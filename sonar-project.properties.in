@@ -1,0 +1,24 @@
+sonar.projectKey=sgleissner_guardfw
+sonar.organization=sgleissner
+
+# This is the name and version displayed in the SonarCloud UI.
+#sonar.projectName=GuardFW
+sonar.projectVersion=@PROJECT_VERSION@
+
+# Path is relative to the sonar-project.properties file. Replace "\" by "/" on Windows.
+sonar.sources=src/
+sonar.exclusions=src/tests/**/*
+sonar.tests=src/tests/
+
+# Encoding of the source code. Default is default system encoding
+sonar.sourceEncoding=UTF-8
+
+# disable cache
+sonar.cfamily.cache.enabled=false
+
+# unit test report path
+sonar.testExecutionReportPaths=unittests/reports/unittest-x86_64.xml
+
+# gcov usage
+# https://community.sonarsource.com/t/how-to-make-sonarqube-see-gcovr-cobertura-reports/56270/2
+sonar.coverageReportPaths=unittests/reports/coverage-x86_64.xml
