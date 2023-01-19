@@ -400,7 +400,7 @@ template<auto WRAPPED_FUNCTION, ResultConcept SUCCESS_RESULT, typename... ARGS>
 				error_flag = is_error(wrapped_function_result);
 
 			// handle success
-			if (!errors_detectable || !error_flag)
+			if (!errors_detectable || !error_flag) [[likely]]
 			{
 				if constexpr (result_contains_value<SUCCESS_RESULT>)
 					return static_cast<SUCCESS_RESULT>(wrapped_function_result);
