@@ -74,7 +74,7 @@ set(library_sources
 
 set(test_sources
         src/tests/test_version.cpp
-        src/tests/test_context_posix.cpp
+        src/tests/test_wrapper.cpp
         )
 
 add_library(guardfw SHARED
