@@ -1,9 +1,20 @@
 /*
- * guardfw/wrapper.hpp
+ * Templated wrapper function around Linux API & POSIX functions for better error handling.
  *
- * (C) 2022-2023 by Simon Gleissner <simon@gleissner.de>
+ * The templated wrapper function 'wrapper()' forwards its arguments to Linux API & POSIX functions.
+ * When returning, the result is checked for errors and, if configured, an error handling is done.
+ * It is e.g. configurable:
+ * - where and how the wrapped API function returns the error indication and the error,
+ * - if errors ahall be thrown as exceptions or returned in std::expected<> as unexpected error,
+ * - if success results shall be casted to other types (e.g. ssize_t -> size_t),
+ * - if blockings (e.g. EAGAIN) shall be detected,
+ * - if repetitions (caused by EINTR) shall be done.
+ * The configuration is done in template parameters, either in a reusable context helper class or
+ * in the wrapper itself.
  *
- * This file is distributed under the ISC license, see file LICENSE.
+ * @author    Simon Gleissner <simon@gleissner.de>, http://guardfw.de
+ * @copyright MIT license, see file LICENSE
+ * @file
  */
 
 #pragma once
@@ -15,11 +26,9 @@
 #include <expected>
 #include <optional>
 #include <type_traits>
-#include <system_error>
 #include <source_location>
-#include <sstream>
-#include <string_view>
 
+#include <guardfw/exceptions.hpp>
 #include <guardfw/traits.hpp>
 
 static_assert(EAGAIN == EWOULDBLOCK, "Linux ensures that EAGAIN==EWOULDBLOCK, but this is not the case here");
@@ -54,9 +63,10 @@ enum class ErrorReport : uint8_t
 /// Descibes special handling for some error codes.
 enum class ErrorSpecial : uint8_t
 {
-	none = 0,				   ///< no special error handling
-	eintr_repeats = (1 << 0),  ///< if interrupted by signal
-	nonblock = (1 << 1),	   ///< returns optional<> for value or bool for no value
+	none = 0,					   ///< no special error handling
+	eintr_repeats = (1 << 0),	   ///< if interrupted by signal
+	nonblock = (1 << 1),		   ///< returns optional<> for value or bool for no value
+	ignore_softerrors = (1 << 2),  ///< soft errors shall be ignored, not returned
 };
 
 /**
@@ -125,26 +135,6 @@ template<Error... SOFT_ERRORS>
 }
 
 /**
- * Throw POSIX system errors, add comprehensive information for what and where the error occured.
- *
- * @param error                 POSIX error number
- * @param wrapped_function_name wrapped POSIX function name
- * @param location              const reference to source location object
- */
-[[noreturn, gnu::always_inline]] static inline void throw_function(
-	Error error, const std::string_view& wrapped_function_name, const std::source_location& location
-)
-{
-	std::ostringstream what;
-	what << "In function '" << location.function_name()		// probably ContextPosix<>::wrapper<>() or guard
-		 << "' in file '" << location.file_name()			// probably wrapped_*.hpp or guard_*.cpp
-		 << "' at line " << location.line()					// probably in wrapped_*.hpp or guard_*.cpp
-		 << ": wrapped call to '" << wrapped_function_name	// wrapped POSIX function name
-		 << "()' failed with error " << error;				// error number
-	throw std::system_error(error, std::system_category(), std::move(what).str());
-}
-
-/**
  * Describes the POSIX calling context for POSIX and Linux API functions for correct error management.
  *
  * @tparam ERROR_INDICATION How is an error indicated?
@@ -170,6 +160,12 @@ private:
 		"direct errors can not be reported, because errors can not be not detected."
 	);
 
+	/// Flag indicates, that soft errors shall be ignored and not reported
+	constexpr static bool ignore_soft_errors {(ERROR_SPECIAL & ErrorSpecial::ignore_softerrors) != ErrorSpecial::none};
+	static_assert(
+		!ignore_soft_errors || errors_detectable, "soft errors can only be ignored, if errors are detectable."
+	);
+
 	/// Flag indicates, that the wrapped function might return soft errors directly.
 	constexpr static bool enable_soft_errors {(sizeof...(SOFT_ERRORS) != 0)};
 	static_assert(
@@ -177,8 +173,11 @@ private:
 		"soft errors can not be reported, because errors can not be not detected."
 	);
 	static_assert(
-		!enable_direct_errors || !enable_soft_errors,
-		"when direct errors are enabled, soft errors are not allowed (redundant setting)"
+		!enable_direct_errors || !(enable_soft_errors && !ignore_soft_errors),
+		"when direct errors are enabled, non-ignored soft errors are not allowed (redundant setting)"
+	);
+	static_assert(
+		!ignore_soft_errors || enable_soft_errors, "soft errors can only be ignored, if at least one is defined"
 	);
 
 	/// Flag indicates, that the wrapped function might throw errors.
@@ -189,7 +188,7 @@ private:
 	);
 
 	/// Flag indicates, that the wrapped function shall be prevented from getting blocked.
-	constexpr static bool enable_nonblocking {(ERROR_SPECIAL & ErrorSpecial::nonblock) == ErrorSpecial::nonblock};
+	constexpr static bool enable_nonblocking {(ERROR_SPECIAL & ErrorSpecial::nonblock) != ErrorSpecial::none};
 	static_assert(
 		!enable_nonblocking || errors_detectable,
 		"blockings are not preventable, because errors can not be not detected."
@@ -207,7 +206,7 @@ private:
 	constexpr static bool result_contains_value {!std::is_void_v<SUCCESS_RESULT>};
 
 	/// Flag indicates, that the result may contain a non-throwing error.
-	constexpr static bool result_contains_error {enable_direct_errors || enable_soft_errors};
+	constexpr static bool result_contains_error {enable_direct_errors || (enable_soft_errors && !ignore_soft_errors)};
 
 	/// Flag, indicates that the result may indicate a blocking prevention.
 	constexpr static bool result_contains_blocking {enable_nonblocking};
@@ -378,6 +377,11 @@ template<auto WRAPPED_FUNCTION, ResultConcept SUCCESS_RESULT, typename... ARGS>
 		"when wrapped function returns void, wrapper must also return void"
 	);
 
+	static_assert(
+		std::is_void_v<SUCCESS_RESULT> || !ignore_soft_errors,
+		"Soft errors can only be ignored, if wrapper returns void in success case"
+	);
+
 	if constexpr (wrapped_function_returns_void)
 	{
 		WRAPPED_FUNCTION(args...);
@@ -432,23 +436,42 @@ template<auto WRAPPED_FUNCTION, ResultConcept SUCCESS_RESULT, typename... ARGS>
 				}
 			}  // may leave scope and continue
 
-			// handle error exceptions
-			if constexpr (enable_exception_errors)
+			// handle instant error exceptions
+			if constexpr (enable_exception_errors && !enable_soft_errors)
+				throw WrapperError(error, name_of<WRAPPED_FUNCTION>(), source_location);
+			else  // constexpr
 			{
-				if constexpr (!enable_soft_errors)	// constexpr
-					throw_function(error, name_of<WRAPPED_FUNCTION>(), source_location);
-				else if (!is_soft_error<SOFT_ERRORS...>(error))	 // NOT constexpr
-					throw_function(error, name_of<WRAPPED_FUNCTION>(), source_location);
-			}  // mey leave scope and continue
+				// handle error exceptions, detect soft errors
+				if constexpr (enable_soft_errors)
+				{
+					if (is_soft_error<SOFT_ERRORS...>(error))
+					{
+						if constexpr (ignore_soft_errors)
+						{  // result contains no value, guaranteed by static_assert above
+							if constexpr (result_contains_blocking)
+								return true;
+							else if constexpr (result_contains_error)
+								return no_error;
+							else  // constexpr
+								return;
+						}  // won't leave scope
+					}	   // may leave scope
+					else
+					{
+						if constexpr (enable_exception_errors)
+							throw WrapperError(error, name_of<WRAPPED_FUNCTION>(), source_location);
+					}  // may leave scope
+				}	   // mey leave scope and continue
 
-			// handle error returns
-			if constexpr (result_contains_error)
-			{
-				if constexpr (result_contains_value<SUCCESS_RESULT> || result_contains_blocking)
-					return std::unexpected<Error>(error);  // returns std::expected<>
-				else									   // constexpr
-					return error;						   // returns Error
-			}											   // won't leave scope, but will return
+				// handle error returns
+				if constexpr (result_contains_error)
+				{
+					if constexpr (result_contains_value<SUCCESS_RESULT> || result_contains_blocking)
+						return std::unexpected<Error>(error);  // returns std::expected<>
+					else									   // constexpr
+						return error;						   // returns Error
+				}											   // won't leave scope, but will return
+			}
 		}
 	}  // we rely on the compiler that all return paths are checked due to constexpr if.
 }  // may reach end of wrapper if constexpr (result_is_void) for void return
@@ -457,14 +480,9 @@ template<auto WRAPPED_FUNCTION, ResultConcept SUCCESS_RESULT, typename... ARGS>
 /// Pre-defined ContextPosix<> used for most POSIX functions as standard context
 using ContextStd = Context<ErrorIndication::eqm1_errno>;
 
-/// Pre-defined ContextPosix<> used for close() without exceptions
-using ContextDirectErrors = Context<ErrorIndication::eqm1_errno, ErrorReport::direct>;
-
-/// Pre-defined ContextPosix<> used for close() without any error handling (forces ignoring error indication)
-using ContextIgnoreErrors = Context<ErrorIndication::none, ErrorReport::none>;
-
-/// Pre-defined ContextPosix<> used for close(), don't throw EINTR, but all other errors
-using ContextSoftEintr = Context<ErrorIndication::eqm1_errno, ErrorReport::exception, ErrorSpecial::none, EINTR>;
+/// Pre-defined ContextPosix<> used for close(), ignore EINTR, but throw all other errors
+using ContextIgnoreEintr
+	= Context<ErrorIndication::eqm1_errno, ErrorReport::exception, ErrorSpecial::ignore_softerrors, EINTR>;
 
 /// Pre-defined ContextPosix<> used for functions, which may return EINTR after signals
 using ContextRepeatEINTR = Context<ErrorIndication::eqm1_errno, ErrorReport::exception, ErrorSpecial::eintr_repeats>;
@@ -474,6 +492,14 @@ using ContextNonblockRepeatEINTR = Context<
 	ErrorIndication::eqm1_errno,
 	ErrorReport::exception,
 	ErrorSpecial::eintr_repeats | ErrorSpecial::nonblock>;
+
+// currently not used
+
+/// Pre-defined ContextPosix<> without exceptions, but direct returned errors
+using ContextDirectErrors = Context<ErrorIndication::eqm1_errno, ErrorReport::direct>;
+
+/// Pre-defined ContextPosix<> used for close() without any error handling (forces ignoring error indication)
+using ContextIgnoreErrors = Context<ErrorIndication::none, ErrorReport::none>;
 
 }  //  namespace GuardFW
 

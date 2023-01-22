@@ -1,9 +1,12 @@
-/*
- * guardfw/wrapped_eventfd.hpp
+/**
+ * Wrappers for system header sys/eventfd.h
  *
- * (C) 2022-2023 by Simon Gleissner <simon@gleissner.de>
+ * This is a convenience header for encapsulating ugly wrapper<>() calls to Linux API and POSIX functions
+ * to nice looking calls with the same or similar name & API, but separate error handling.
  *
- * This file is distributed under the MIT license, see file LICENSE.
+ * @author    Simon Gleissner <simon@gleissner.de>, http://guardfw.de
+ * @copyright MIT license, see file LICENSE
+ * @file
  */
 
 #pragma once
@@ -11,12 +14,14 @@
 #define GUARDFW_WRAPPED_EVENTFD_HPP
 
 #include <sys/eventfd.h>
+
 #include <guardfw/wrapper.hpp>
+#include <guardfw/file_descriptor.hpp>
 
 namespace GuardFW
 {
 
-[[nodiscard]] inline static int eventfd(
+[[nodiscard]] inline static FileDescriptor eventfd(
 	unsigned int initval, int flags, const std::source_location& source_location = std::source_location::current()
 )
 {

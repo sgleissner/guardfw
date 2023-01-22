@@ -1,10 +1,14 @@
-/*
-* guardfw/file_descriptor.hpp
-*
-* (C) 2022-2023 by Simon Gleissner <simon@gleissner.de>
-*
-* This file is distributed under the MIT license, see file LICENSE.
-*/
+/**
+ * Type definition for file descriptors.
+ *
+ * POSIX file descriptors are defined as 'int', but as this is ambiguous for reading,
+ * so 'FileDescriptor' will be used. Additionally POSIX message queues are using int (=mqd_t)
+ * as descriptors, which will also be referenced as 'FileDescriptor' by this library.
+ *
+ * @author    Simon Gleissner <simon@gleissner.de>, http://guardfw.de
+ * @copyright MIT license, see file LICENSE
+ * @file
+ */
 
 #pragma once
 #ifndef GUARDFW_FILE_DESCRIPTOR_HPP

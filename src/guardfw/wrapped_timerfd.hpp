@@ -1,9 +1,12 @@
-/*
- * guardfw/wrapped_timerfd.hpp
+/**
+ * Wrappers for system header sys/timerfd.h
  *
- * (C) 2022-2023 by Simon Gleissner <simon@gleissner.de>
+ * This is a convenience header for encapsulating ugly wrapper<>() calls to Linux API and POSIX functions
+ * to nice looking calls with the same or similar name & API, but separate error handling.
  *
- * This file is distributed under the MIT license, see file LICENSE.
+ * @author    Simon Gleissner <simon@gleissner.de>, http://guardfw.de
+ * @copyright MIT license, see file LICENSE
+ * @file
  */
 
 #pragma once

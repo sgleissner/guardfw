@@ -1,9 +1,13 @@
-/*
- * guardfw/traits.hpp
+/**
+ * Type traits collection for GuardFW.
  *
- * (C) 2022-2023 by Simon Gleissner <simon@gleissner.de>
+ * POSIX file descriptors are defined as 'int', but as this is ambiguous for reading,
+ * so 'FileDescriptor' will be used. Additionally POSIX message queues are using int (=mqd_t)
+ * as descriptors, which will also be referenced as 'FileDescriptor' by this library.
  *
- * This file is distributed under the ISC license, see file LICENSE.
+ * @author    Simon Gleissner <simon@gleissner.de>, http://guardfw.de
+ * @copyright MIT license, see file LICENSE
+ * @file
  */
 
 #pragma once
@@ -54,6 +58,7 @@ using ReturnType = decltype(return_type(FUNCTION_POINTER));
 template<auto FUNCTION_POINTER>
 consteval static std::string_view name_of()
 {
+	// TODO: add type check for FUNCTION_POINTER
 	const char* start = __PRETTY_FUNCTION__;  // reads FUNCTION_POINTER as part of full function name
 	while (*start != '\0' && *start != '=')
 		start++;
@@ -64,7 +69,7 @@ consteval static std::string_view name_of()
 	const char* end = start;
 	while (*end != '\0' && *end != ';')
 		end++;
-	return std::string_view(start, end - start);
+	return std::string_view(start, static_cast<size_t>(end - start));
 }
 
 }  //  namespace GuardFW

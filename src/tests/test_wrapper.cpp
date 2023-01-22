@@ -1,9 +1,9 @@
-/*
- * tests/test_wrapper.cpp
+/**
+ * Catch2 unit tests for guardfw/wrapper.hpp
  *
- * (C) 2022-2023 by Simon Gleissner <simon@gleissner.de>
- *
- * This file is distributed under the ISC license, see file LICENSE.
+ * @author    Simon Gleissner <simon@gleissner.de>, http://guardfw.de
+ * @copyright MIT license, see file LICENSE
+ * @file
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -25,8 +25,8 @@ static int tester_std(int return_value, unsigned int error)
 {
 	if (error > 0)
 	{
-		errno = error;
-		return_value = -1;
+		errno = static_cast<int>(error);
+		return -1;
 	}
 	return return_value;
 }
@@ -35,8 +35,8 @@ static int tester_unsigned_cast(unsigned int return_value, unsigned int error)
 {
 	if (error > 0)
 	{
-		errno = error;
-		return_value = -1;
+		errno = static_cast<int>(error);
+		return -1;
 	}
 	return static_cast<int>(return_value);
 }
@@ -46,7 +46,7 @@ static int tester_repeat(int return_value, unsigned int error)
 	static bool success = false;
 	if (success == false)
 	{
-		errno = error;
+		errno = static_cast<int>(error);
 		return_value = -1;
 	}
 	success = !success;	 // for next try
@@ -57,7 +57,7 @@ static void* tester_void_ptr(void* return_value, unsigned int error)
 {
 	if (error > 0)
 	{
-		errno = error;
+		errno = static_cast<int>(error);
 		return_value = reinterpret_cast<void*>(static_cast<intptr_t>(-1));
 	}
 	return return_value;
@@ -72,7 +72,7 @@ static Demo* tester_demo_ptr(Demo* return_value, unsigned int error)
 {
 	if (error > 0)
 	{
-		errno = error;
+		errno = static_cast<int>(error);
 		return_value = reinterpret_cast<Demo*>(static_cast<intptr_t>(0));
 	}
 	return return_value;
@@ -188,8 +188,7 @@ TEST_CASE("wrapper: blockings & success, return std::optional<>", "[wrapper]")
 }
 
 TEST_CASE(
-	"wrapper: blockings & direct error & success, return std::expected<std::optional<unsigned int>,Error>",
-	"[wrapper]"
+	"wrapper: blockings & direct error & success, return std::expected<std::optional<unsigned int>,Error>", "[wrapper]"
 )
 {
 	using ContextDirectErrorNonblock = GuardFW::
@@ -271,13 +270,19 @@ TEST_CASE("wrapper: void* call, test for -1 and errno, return void*", "[wrapper]
 		  void*,
 		  GuardFW::ReturnType<(ContextEqm1ErrnoChanged::wrapper<tester_void_ptr, void*, void*, unsigned int>)>>);
 	int dummy;
-	errno=EBUSY;
-	CHECK(reinterpret_cast<void*>(0) == ContextEqm1ErrnoChanged::wrapper<tester_void_ptr>(fixloc, reinterpret_cast<void*>(0), 0));
-	errno=EBUSY;
-	CHECK(reinterpret_cast<void*>(-1) == ContextEqm1ErrnoChanged::wrapper<tester_void_ptr>(fixloc, reinterpret_cast<void*>(-1), 0));
-	errno=EBUSY;
+	errno = EBUSY;
+	CHECK(
+		reinterpret_cast<void*>(0)
+		== ContextEqm1ErrnoChanged::wrapper<tester_void_ptr>(fixloc, reinterpret_cast<void*>(0), 0)
+	);
+	errno = EBUSY;
+	CHECK(
+		reinterpret_cast<void*>(-1)
+		== ContextEqm1ErrnoChanged::wrapper<tester_void_ptr>(fixloc, reinterpret_cast<void*>(-1), 0)
+	);
+	errno = EBUSY;
 	CHECK(reinterpret_cast<void*>(&dummy) == ContextEqm1ErrnoChanged::wrapper<tester_void_ptr>(fixloc, &dummy, 0));
-	errno=EBUSY;
+	errno = EBUSY;
 	CHECK_THROWS(ContextEqm1ErrnoChanged::wrapper<tester_void_ptr>(fixloc, &dummy, EINVAL));
 }
 
@@ -288,12 +293,27 @@ TEST_CASE("wrapper: Demo* call, test for 0 and errno, return Demo*", "[wrapper]"
 		  Demo*,
 		  GuardFW::ReturnType<(ContextEq0ErrnoChanged::wrapper<tester_demo_ptr, Demo*, Demo*, unsigned int>)>>);
 	Demo demo {.demo = 40};
-	errno=EBUSY;
-	CHECK(reinterpret_cast<Demo*>(0) == ContextEq0ErrnoChanged::wrapper<tester_demo_ptr>(fixloc, reinterpret_cast<Demo*>(0), 0));
-	errno=EBUSY;
-	CHECK(reinterpret_cast<Demo*>(-1) == ContextEq0ErrnoChanged::wrapper<tester_demo_ptr>(fixloc, reinterpret_cast<Demo*>(-1), 0));
-	errno=EBUSY;
+	errno = EBUSY;
+	CHECK(
+		reinterpret_cast<Demo*>(0)
+		== ContextEq0ErrnoChanged::wrapper<tester_demo_ptr>(fixloc, reinterpret_cast<Demo*>(0), 0)
+	);
+	errno = EBUSY;
+	CHECK(
+		reinterpret_cast<Demo*>(-1)
+		== ContextEq0ErrnoChanged::wrapper<tester_demo_ptr>(fixloc, reinterpret_cast<Demo*>(-1), 0)
+	);
+	errno = EBUSY;
 	CHECK(reinterpret_cast<Demo*>(&demo) == ContextEq0ErrnoChanged::wrapper<tester_demo_ptr>(fixloc, &demo, 0));
-	errno=EBUSY;
+	errno = EBUSY;
 	CHECK_THROWS(ContextEq0ErrnoChanged::wrapper<tester_demo_ptr>(fixloc, &demo, EINVAL));
+}
+
+TEST_CASE("wrapper: close() test, throws, EINTR ignored, return void", "[wrapper]")
+{
+	CHECK(std::is_void_v<
+		  GuardFW::ReturnType<(GuardFW::ContextIgnoreEintr::wrapper<tester_std, void, int, unsigned int>)>>);
+	CHECK_NOTHROW(GuardFW::ContextIgnoreEintr::wrapper<tester_std, void>(fixloc, 0, 0));
+	CHECK_NOTHROW(GuardFW::ContextIgnoreEintr::wrapper<tester_std, void>(fixloc, 0, EINTR));
+	CHECK_THROWS(GuardFW::ContextIgnoreEintr::wrapper<tester_std, void>(fixloc, 0, EINVAL));
 }

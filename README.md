@@ -1,3 +1,3 @@
 # GuardFW
 
-templated C++ wrapper around posix functions for proper error handling
+Templated C++ wrapper around Linux API functions for proper error handling.

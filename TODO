@@ -1,3 +1,6 @@
 - switch to gcc-13, as soon GitHub runner image supports it.
 - wrapper.hpp: change throw_function() to make usage of std::format().
 - re-enable SonarQube, as soon as its support C++23.
+- add static_assert type check for template name_of() in traits.hpp
+- switch to C++20 modules
+- use CPack for package RPM files

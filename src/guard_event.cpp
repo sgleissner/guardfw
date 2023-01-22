@@ -1,9 +1,13 @@
-/*
- * guard_event.cpp
+/**
+ * Guard class for wrapping the file descriptor of eventfd kernel objects and providung an API.
  *
- * (C) 2022-2023 by Simon Gleissner <simon@gleissner.de>
+ * A guard class encapsulates the handle for a kernel object (here for eventfd events).
+ * This derived class provides opening and closing in constructor & destructor
+ * and the rest of the API as member functions.
  *
- * This file is distributed under the MIT license, see file LICENSE.
+ * @author    Simon Gleissner <simon@gleissner.de>, http://guardfw.de
+ * @copyright MIT license, see file LICENSE
+ * @file
  */
 
 #include <cstdint>
@@ -11,7 +15,6 @@
 #include <utility>
 
 #include <guardfw/guard_event.hpp>
-
 #include <guardfw/wrapped_eventfd.hpp>
 #include <guardfw/wrapped_unistd.hpp>
 
@@ -28,7 +31,7 @@ GuardEvent::GuardEvent(GuardEvent&& move)
 
 GuardEvent::~GuardEvent()
 {
-	close_on_destruction<GuardFW::close_ignore_eintr>();  // may throw
+	close_on_destruction<GuardFW::close>();	 // may throw
 }
 
 uint64_t GuardEvent::get_counter() const
