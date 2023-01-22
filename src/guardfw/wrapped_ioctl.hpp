@@ -1,9 +1,12 @@
-/*
- * guardfw/wrapped_ioctl.hpp
+/**
+ * Wrappers for system header sys/ioctl.h
  *
- * (C) 2022-2023 by Simon Gleissner <simon@gleissner.de>
+ * This is a convenience header for encapsulating ugly wrapper<>() calls to Linux API and POSIX functions
+ * to nice looking calls with the same or similar name & API, but separate error handling.
  *
- * This file is distributed under the MIT license, see file LICENSE.
+ * @author    Simon Gleissner <simon@gleissner.de>, http://guardfw.de
+ * @copyright MIT license, see file LICENSE
+ * @file
  */
 
 #pragma once
@@ -11,22 +14,28 @@
 #define GUARDFW_WRAPPED_IOCTL_HPP
 
 #include <sys/ioctl.h>
+
 #include <guardfw/wrapper.hpp>
+#include <guardfw/file_descriptor.hpp>
 
 namespace GuardFW
 {
 
-template<typename T>
-inline static void ioctl(
-	int fd, unsigned long request, T* ptr, const std::source_location& source_location = std::source_location::current()
+inline static void ioctl_noretval(
+	FileDescriptor fd,
+	unsigned long request,
+	void* ptr,
+	const std::source_location& source_location = std::source_location::current()
 )
 {
 	ContextStd::wrapper<::ioctl, void>(source_location, fd, request, ptr);
 }
 
-template<typename T>
 [[nodiscard]] inline static int ioctl_retval(
-	int fd, unsigned long request, T* ptr, const std::source_location& source_location = std::source_location::current()
+	FileDescriptor fd,
+	unsigned long request,
+	void* ptr,
+	const std::source_location& source_location = std::source_location::current()
 )
 {
 	return ContextStd::wrapper<::ioctl>(source_location, fd, request, ptr);

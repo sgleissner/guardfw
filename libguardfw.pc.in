@@ -5,7 +5,7 @@ includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
 
 Name: libguardfw
 URL: http://www.concurrentfw.de
-Description: templated C++ wrapper around posix functions for proper error handling
+Description: Templated C++ wrapper around Linux API functions for proper error handling.
 Version: @PROJECT_VERSION@
 Requires: 
 Libs: -L${libdir} -lguardfw

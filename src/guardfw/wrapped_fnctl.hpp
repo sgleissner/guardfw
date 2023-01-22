@@ -1,9 +1,12 @@
-/*
- * guardfw/wrapped_fnctl.hpp
+/**
+ * Wrappers for system header fcntl.h
  *
- * (C) 2022-2023 by Simon Gleissner <simon@gleissner.de>
+ * This is a convenience header for encapsulating ugly wrapper<>() calls to Linux API and POSIX functions
+ * to nice looking calls with the same or similar name & API, but separate error handling.
  *
- * This file is distributed under the MIT license, see file LICENSE.
+ * @author    Simon Gleissner <simon@gleissner.de>, http://guardfw.de
+ * @copyright MIT license, see file LICENSE
+ * @file
  */
 
 #pragma once
@@ -11,54 +14,56 @@
 #define GUARDFW_WRAPPED_FNCTL_HPP
 
 #include <fcntl.h>
-#include <guardfw/context_posix.hpp>
+
+#include <guardfw/wrapper.hpp>
+#include <guardfw/file_descriptor.hpp>
 
 namespace GuardFW
 {
 
-[[nodiscard]] inline static int open(
+[[nodiscard]] inline static FileDescriptor open(
 	const char* pathname, int flags, const std::source_location& source_location = std::source_location::current()
 )
 {
-	return ContextPosix_RepeatEINTR::wrapper<::open>(source_location, pathname, flags);
+	return ContextRepeatEINTR::wrapper<::open>(source_location, pathname, flags);
 }
 
-[[nodiscard]] inline static int open(
+[[nodiscard]] inline static FileDescriptor open(
 	const char* pathname,
 	int flags,
 	mode_t mode,
 	const std::source_location& source_location = std::source_location::current()
 )
 {
-	return ContextPosix_RepeatEINTR::wrapper<::open>(source_location, pathname, flags, mode);
+	return ContextRepeatEINTR::wrapper<::open>(source_location, pathname, flags, mode);
 }
 
-[[nodiscard]] inline static int creat(
+[[nodiscard]] inline static FileDescriptor creat(
 	const char* pathname, mode_t mode, const std::source_location& source_location = std::source_location::current()
 )
 {
-	return ContextPosix_RepeatEINTR::wrapper<::creat>(source_location, pathname, mode);
+	return ContextRepeatEINTR::wrapper<::creat>(source_location, pathname, mode);
 }
 
-[[nodiscard]] inline static int openat(
-	int dirfd,
+[[nodiscard]] inline static FileDescriptor openat(
+	FileDescriptor dirfd,
 	const char* pathname,
 	int flags,
 	const std::source_location& source_location = std::source_location::current()
 )
 {
-	return ContextPosix_RepeatEINTR::wrapper<::openat>(source_location, dirfd, pathname, flags);
+	return ContextRepeatEINTR::wrapper<::openat>(source_location, dirfd, pathname, flags);
 }
 
-[[nodiscard]] inline static int openat(
-	int dirfd,
+[[nodiscard]] inline static FileDescriptor openat(
+	FileDescriptor dirfd,
 	const char* pathname,
 	int flags,
 	mode_t mode,
 	const std::source_location& source_location = std::source_location::current()
 )
 {
-	return ContextPosix_RepeatEINTR::wrapper<::openat>(source_location, dirfd, pathname, flags, mode);
+	return ContextRepeatEINTR::wrapper<::openat>(source_location, dirfd, pathname, flags, mode);
 }
 
 }  // namespace GuardFW

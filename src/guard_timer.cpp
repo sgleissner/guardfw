@@ -1,9 +1,13 @@
-/*
- * guard_timer.cpp
+/**
+ * Guard class for wrapping the file descriptor of timerfd kernel objects and providung an API.
  *
- * (C) 2022-2023 by Simon Gleissner <simon@gleissner.de>
+ * A guard class encapsulates the handle for a kernel object (here for timerfd timers).
+ * This derived class provides opening and closing in constructor & destructor
+ * and the rest of the API as member functions.
  *
- * This file is distributed under the MIT license, see file LICENSE.
+ * @author    Simon Gleissner <simon@gleissner.de>, http://guardfw.de
+ * @copyright MIT license, see file LICENSE
+ * @file
  */
 
 #include <cstdint>
@@ -27,7 +31,7 @@ GuardTimer::GuardTimer(GuardTimer&& move)
 
 GuardTimer::~GuardTimer()
 {
-	close_on_destruction<GuardFW::close_ignore_eintr>();  // may throw
+	close_on_destruction<GuardFW::close>();	 // may throw
 }
 
 uint64_t GuardTimer::get_expirations() const
@@ -39,7 +43,7 @@ uint64_t GuardTimer::get_expirations() const
 
 void GuardTimer::set_expirations(uint64_t expirations) const
 {
-	GuardFW::ioctl(handle, TFD_IOC_SET_TICKS, &expirations);
+	GuardFW::ioctl_noretval(handle, TFD_IOC_SET_TICKS, &expirations);
 }
 
 void GuardTimer::set_time(int flags, const struct itimerspec& new_value, struct itimerspec& old_value) const

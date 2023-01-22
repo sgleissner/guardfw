@@ -1,11 +1,11 @@
-/*
- * guardfw/config.hpp
- *
- * (C) 2022-2023 by Simon Gleissner <simon@gleissner.de>, https://simon.gleissner.de
- *
- * This file is distributed under the MIT license, see file LICENSE.
+/**
+ * Auto-generated version numbers.
  *
  * This is a generated file, do not edit!
+ *
+ * @author    Simon Gleissner <simon@gleissner.de>, http://guardfw.de
+ * @copyright MIT license, see file LICENSE
+ * @file
  */
 
 #pragma once

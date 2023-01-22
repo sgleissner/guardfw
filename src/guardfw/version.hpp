@@ -1,9 +1,12 @@
-/*
- * guardfw/version.hpp
+/**
+ * Helper class for providing the library version number.
  *
- * (C) 2022-2023 by Simon Gleissner <simon@gleissner.de>
+ * The class needs access to a generated version header file,
+ * which contains the cmake project version number.
  *
- * This file is distributed under the MIT license, see file LICENSE.
+ * @author    Simon Gleissner <simon@gleissner.de>, http://guardfw.de
+ * @copyright MIT license, see file LICENSE
+ * @file
  */
 
 #pragma once

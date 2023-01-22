@@ -6,9 +6,9 @@ cmake_minimum_required(VERSION 3.21)
 # TODO: more robust install
 
 project(guardfw
-        VERSION 0.0.1
-        DESCRIPTION "templated C++ wrapper around posix functions for proper error handling"
-        HOMEPAGE_URL "https://simon.gleissner.de"
+        VERSION 0.0.2
+        DESCRIPTION "Templated C++ wrapper around Linux API functions for proper error handling."
+        HOMEPAGE_URL "https://guardfw.de"
         LANGUAGES CXX
         )
 
@@ -38,9 +38,10 @@ add_compile_options(
         -Wall
         -Wextra
         -Wpedantic
+        -Wconversion
+        -Wno-terminate
         -Werror
         -O3
-        -Wno-terminate
 )
 
 if (COMPILE_COVERAGE)
@@ -52,6 +53,7 @@ set(public_headers
         src/guardfw/file_descriptor.hpp
         src/guardfw/guard.hpp
         src/guardfw/guard_event.hpp
+        src/guardfw/guard_file.hpp
         src/guardfw/guard_timer.hpp
         src/guardfw/traits.hpp
         src/guardfw/version.hpp
@@ -68,18 +70,21 @@ set(public_headers
         )
 
 set(library_sources
+        src/exceptions.cpp
         src/guard_event.cpp
+        src/guard_file.cpp
         src/guard_timer.cpp
         )
 
 set(test_sources
         src/tests/test_version.cpp
         src/tests/test_wrapper.cpp
+        src/tests/test_file.cpp
         )
 
 add_library(guardfw SHARED
         ${library_sources}
-        #        ${public_headers}
+        # ${public_headers}
         )
 
 add_library(guardfw-static STATIC

@@ -1,9 +1,13 @@
-/*
- * guardfw/guard_event.hpp
+/**
+ * Guard class for wrapping the file descriptor of eventfd kernel objects and providung an API.
  *
- * (C) 2022-2023 by Simon Gleissner <simon@gleissner.de>
+ * A guard class encapsulates the handle for a kernel object (here for eventfd events).
+ * This derived class provides opening and closing in constructor & destructor
+ * and the rest of the API as member functions.
  *
- * This file is distributed under the MIT license, see file LICENSE.
+ * @author    Simon Gleissner <simon@gleissner.de>, http://guardfw.de
+ * @copyright MIT license, see file LICENSE
+ * @file
  */
 
 #pragma once
