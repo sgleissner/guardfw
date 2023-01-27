@@ -20,6 +20,6 @@ TEST_CASE("version number", "[version]")
 	);
 	CHECK(GuardFW::Version::MAJOR == 0);  // must be manually changed on each
 	CHECK(GuardFW::Version::MINOR == 0);  // version change in CMakeLists.txt
-	CHECK(GuardFW::Version::PATCH == 2);
+	CHECK(GuardFW::Version::PATCH == 3);
 	//	CHECK(GuardFW::Version::TWEAK == 0);
 }

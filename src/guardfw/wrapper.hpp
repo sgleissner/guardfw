@@ -44,9 +44,9 @@ constexpr static Error no_error = 0;  ///< POSIX does not define a success error
 enum class ErrorIndication : uint8_t
 {
 	none,				 ///< wrapped function is guaranteed always successful or forced to ignore errors (be careful)
-	eq0_errno,			 ///< error if return value == 0, e.g. for fopen() etc.
 	lt0_direct,			 ///< error if return value < 0, negative value is error code: e.g. for io_uring_enter()
-	bt0_direct,			 ///< error if return value > 0, positive value is error code
+	bt0_direct,			 ///< error if return value > 0, positive value is error code: e.g. for pthread_cancel()
+	eq0_errno,			 ///< error if return value == 0, e.g. for fopen()
 	eqm1_errno,			 ///< error if return value == -1: standard behaviour
 	eq0_errno_changed,	 ///< error if return value == 0 and errno changed from 0 other value: e.g. for readdir()
 	eqm1_errno_changed,	 ///< error if return value == -1 and errno changed from 0 other value: e.g. for getpriority()
@@ -493,8 +493,10 @@ using ContextNonblockRepeatEINTR = Context<
 	ErrorReport::exception,
 	ErrorSpecial::eintr_repeats | ErrorSpecial::nonblock>;
 
-// currently not used
+/// Pre-defined ContextPosix<> used for getpriority(), like ContextStd, but with special errno handling
+using ContextMinus1ErrnoChanged = Context<ErrorIndication::eqm1_errno_changed>;
 
+// currently not used
 /// Pre-defined ContextPosix<> without exceptions, but direct returned errors
 using ContextDirectErrors = Context<ErrorIndication::eqm1_errno, ErrorReport::direct>;
 

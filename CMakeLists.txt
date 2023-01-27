@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.21)
 # TODO: more robust install
 
 project(guardfw
-        VERSION 0.0.2
+        VERSION 0.0.3
         DESCRIPTION "Templated C++ wrapper around Linux API functions for proper error handling."
         HOMEPAGE_URL "https://guardfw.de"
         LANGUAGES CXX

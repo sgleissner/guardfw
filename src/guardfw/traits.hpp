@@ -49,6 +49,72 @@ static RETURN_TYPE return_type(RETURN_TYPE (*)(ARGS..., ...));	// forward declar
 template<auto FUNCTION_POINTER>
 using ReturnType = decltype(return_type(FUNCTION_POINTER));
 
+
+/**
+ * Reveals if an object is a function pointer; here: default for non-function-pointer objects.
+ *
+ * @tparam T Type of the non-function-pointer object.
+ * @return   Always false.
+ */
+template<typename T>
+consteval bool is_function_pointer(T)
+{
+	return false;
+};
+
+/**
+ * Reveals if an object is a function pointer; here: specialization of function pointers without C-ellipsis.
+ *
+ * @tparam RETURN_TYPE Return type of function pointer
+ * @tparam ARGS        Argument types of function pointer
+ * @return             Always true.
+ */
+template<class RETURN_TYPE, class... ARGS>
+consteval bool is_function_pointer(RETURN_TYPE (*)(ARGS...))
+{
+	return true;
+};
+
+/**
+ * Reveals if an object is a function pointer; here: specialization of noexcept function pointers without C-ellipsis.
+ *
+ * @tparam RETURN_TYPE Return type of function pointer
+ * @tparam ARGS        Argument types of function pointer
+ * @return             Always true.
+ */
+template<class RETURN_TYPE, class... ARGS>
+consteval bool is_function_pointer(RETURN_TYPE (*)(ARGS...) noexcept)
+{
+	return true;
+};
+
+/**
+ * Reveals if an object is a function pointer; here: specialization of function pointers with C-ellipsis.
+ *
+ * @tparam RETURN_TYPE Return type of function pointer
+ * @tparam ARGS        Argument types of function pointer
+ * @return             Always true.
+ */
+template<class RETURN_TYPE, class... ARGS>
+consteval bool is_function_pointer(RETURN_TYPE (*)(ARGS..., ...))
+{
+	return true;
+};
+
+/**
+ * Reveals if an object is a function pointer; here: specialization of noexcept function pointers with C-ellipsis.
+ *
+ * @tparam RETURN_TYPE Return type of function pointer
+ * @tparam ARGS        Argument types of function pointer
+ * @return             Always true.
+ */
+template<class RETURN_TYPE, class... ARGS>
+consteval bool is_function_pointer(RETURN_TYPE (*)(ARGS..., ...) noexcept)
+{
+	return true;
+};
+
+
 /**
  * Reflection helper for getting the name of the wrapped function.
  *
@@ -58,7 +124,8 @@ using ReturnType = decltype(return_type(FUNCTION_POINTER));
 template<auto FUNCTION_POINTER>
 consteval static std::string_view name_of()
 {
-	// TODO: add type check for FUNCTION_POINTER
+	static_assert(GuardFW::is_function_pointer(FUNCTION_POINTER), "name_of() works only with function pointers.");
+
 	const char* start = __PRETTY_FUNCTION__;  // reads FUNCTION_POINTER as part of full function name
 	while (*start != '\0' && *start != '=')
 		start++;
