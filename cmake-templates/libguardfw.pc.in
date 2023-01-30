@@ -3,10 +3,10 @@ exec_prefix=@CMAKE_INSTALL_PREFIX@
 libdir=${exec_prefix}/@CMAKE_INSTALL_LIBDIR@
 includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
 
-Name: libguardfw
-URL: http://www.concurrentfw.de
-Description: Templated C++ wrapper around Linux API functions for proper error handling.
-Version: @PROJECT_VERSION@
+Name: @CMAKE_PROJECT_NAME@
+URL: @CMAKE_PROJECT_HOMEPAGE_URL@
+Description: @CMAKE_PROJECT_DESCRIPTION@
+Version: @CMAKE_PROJECT_VERSION@
 Requires: 
-Libs: -L${libdir} -lguardfw
+Libs: -L${libdir} -l@CMAKE_PROJECT_NAME@
 Cflags: -I${includedir}
