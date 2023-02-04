@@ -1,0 +1,52 @@
+# @file_generated_warning@
+
+Name:          @CMAKE_PROJECT_NAME@
+Version:       @CMAKE_PROJECT_VERSION@
+Release:       0
+Summary:       @CMAKE_PROJECT_DESCRIPTION@
+License:       MIT
+URL:           @CMAKE_PROJECT_HOMEPAGE_URL@
+Source:        @github_project@/archive/refs/tags/@PROJECT_VERSION@.tar.gz
+BuildRequires: gcc13
+BuildRequires: gcc13-c++
+BuildRequires: cmake
+BuildRequires: pkg-config
+
+%description
+@project_long_description@ (shared library)
+
+%description devel
+@project_long_description@ (development files)
+
+%prep
+%setup -q -n %{name}-%{version}
+
+%build
+export CFLAGS="$RPM_OPT_FLAGS -DNDEBUG"
+export CXXFLAGS="$RPM_OPT_FLAGS -DNDEBUG"
+cmake -DCMAKE_INSTALL_PREFIX=/usr .
+make %{?jobs:-j%jobs}
+
+%install
+make install DESTDIR="$RPM_BUILD_ROOT"
+
+%license LICENSE
+
+%files
+%defattr(-,root,root,-)
+%doc README.md
+%{_libdir}/*.so*
+
+%files devel
+%{_includedir}/%{name}/*.hpp
+%{_datadir}/pkgconfig/*.pc
+
+# %files devel-static
+# %{_libdir}/%{name}-%{version}/*.a
+# Requires: devel
+
+# TODO: cmake packages config
+# https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html
+# <prefix>/lib/cmake/foo-1.2/FooConfig.cmake
+
+%changelog

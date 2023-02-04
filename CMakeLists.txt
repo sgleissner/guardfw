@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
+cmake_policy(SET CMP0048 NEW)
 
 # TODO: strip objects
 # TODO: test application linking to static libaray
@@ -7,10 +8,16 @@ cmake_minimum_required(VERSION 3.21)
 
 project(guardfw
         VERSION 0.0.3
-        DESCRIPTION "Templated C++ wrapper around Linux API functions for proper error handling."
-        HOMEPAGE_URL "https://guardfw.de"
+        DESCRIPTION "Templated C++ wrapper around Linux API functions for proper error handling" # without '.'
+        HOMEPAGE_URL "http://guardfw.de"
         LANGUAGES CXX
         )
+
+# TODO perhaps get description from a file, used for rpm spec files
+set(project_long_description "${CMAKE_PROJECT_DESCRIPTION}.")
+
+set(github_home "https://github.com/sgleissner")
+set(github_project "${github_home}/${CMAKE_PROJECT_NAME}")
 
 include(GNUInstallDirs)
 
@@ -61,6 +68,7 @@ set(public_headers
         src/guardfw/wrapped_fnctl.hpp
         src/guardfw/wrapped_ioctl.hpp
         src/guardfw/wrapped_mqueue.hpp
+        src/guardfw/wrapped_resource.hpp
         src/guardfw/wrapped_signalfd.hpp
         src/guardfw/wrapped_socket.hpp
         src/guardfw/wrapped_timerfd.hpp
@@ -84,7 +92,6 @@ set(test_sources
 
 add_library(guardfw SHARED
         ${library_sources}
-        # ${public_headers}
         )
 
 add_library(guardfw-static STATIC
@@ -95,21 +102,31 @@ add_executable(guardfw-tests
         ${test_sources}
         )
 
-add_dependencies(guardfw-static guardfw-tests)
+add_dependencies(guardfw-tests guardfw-static)
 
-configure_file(libguardfw.pc.in libguardfw.pc @ONLY)
-configure_file(config.hpp.in guardfw/generated_config.hpp @ONLY)
-configure_file(sonar-project.properties.in ${CMAKE_SOURCE_DIR}/sonar-project.properties @ONLY)
+set(file_generated_warning "This is a cmake-generated file, do not edit!")
+
+configure_file(cmake-templates/libguardfw.pc.in libguardfw.pc @ONLY)
+configure_file(cmake-templates/config.hpp.in guardfw/generated_config.hpp @ONLY)
+configure_file(cmake-templates/sonar-project.properties.in ${CMAKE_SOURCE_DIR}/sonar-project.properties @ONLY)
+configure_file(cmake-templates/obs-rpm.spec.in ${CMAKE_SOURCE_DIR}/openbuildservice/obs-rpm.spec @ONLY)
 
 set_target_properties(guardfw PROPERTIES
         VERSION ${PROJECT_VERSION}
-        SOVERSION ${PROJECT_VERSION_MAJOR}
+        NO_SONAME ON
+        # SOVERSION ${PROJECT_VERSION}
         PUBLIC_HEADER "${public_headers}"
+        OUTPUT_NAME ${PROJECT_NAME}-${PROJECT_VERSION}
+        )
+
+set_target_properties(guardfw-static PROPERTIES
+        VERSION ${PROJECT_VERSION}
+        OUTPUT_NAME ${PROJECT_NAME}
         )
 
 include_directories(
-        src                    # for guardfw/*
-        ${CMAKE_BINARY_DIR}    # for guardfw/generated_config.h
+        src
+        ${CMAKE_BINARY_DIR}    # for generated_config.h
 )
 
 target_link_libraries(guardfw-tests PRIVATE
@@ -119,14 +136,26 @@ target_link_libraries(guardfw-tests PRIVATE
         -pthread
         )
 
-install(TARGETS guardfw guardfw-static
+install(TARGETS guardfw
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/guardfw
+        # RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
         )
 
-install(FILES ${CMAKE_BINARY_DIR}/libguardfw.pc
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+install(TARGETS guardfw-static
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME}-${PROJECT_VERSION}
+        # RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
+        )
+
+# install(TARGETS guardfw-tests
+#        # LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+#        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+#        # PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
+#        )
+
+install(FILES ${CMAKE_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX} ${CMAKE_PROJECT_NAME}.pc
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/pkgconfig
         )
 
 include(CTest)
