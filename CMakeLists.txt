@@ -106,7 +106,7 @@ add_dependencies(guardfw-tests guardfw-static)
 
 set(file_generated_warning "This is a cmake-generated file, do not edit!")
 
-configure_file(cmake-templates/libguardfw.pc.in libguardfw.pc @ONLY)
+configure_file(cmake-templates/guardfw.pc.in guardfw.pc @ONLY)
 configure_file(cmake-templates/config.hpp.in guardfw/generated_config.hpp @ONLY)
 configure_file(cmake-templates/sonar-project.properties.in ${CMAKE_SOURCE_DIR}/sonar-project.properties @ONLY)
 configure_file(cmake-templates/obs-rpm.spec.in ${CMAKE_SOURCE_DIR}/openbuildservice/obs-rpm.spec @ONLY)
@@ -143,9 +143,9 @@ install(TARGETS guardfw
         )
 
 install(TARGETS guardfw-static
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME}-${PROJECT_VERSION}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         # RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
+        # PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
         )
 
 # install(TARGETS guardfw-tests
@@ -154,7 +154,7 @@ install(TARGETS guardfw-static
 #        # PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
 #        )
 
-install(FILES ${CMAKE_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX} ${CMAKE_PROJECT_NAME}.pc
+install(FILES ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.pc
         DESTINATION ${CMAKE_INSTALL_DATADIR}/pkgconfig
         )
 

@@ -3,7 +3,7 @@
 Name:          @CMAKE_PROJECT_NAME@
 Version:       @CMAKE_PROJECT_VERSION@
 Release:       0
-Summary:       @CMAKE_PROJECT_DESCRIPTION@
+Summary:       @CMAKE_PROJECT_DESCRIPTION@ (shared library)
 License:       MIT
 URL:           @CMAKE_PROJECT_HOMEPAGE_URL@
 Source:        @github_project@/archive/refs/tags/@PROJECT_VERSION@.tar.gz
@@ -12,11 +12,23 @@ BuildRequires: gcc13-c++
 BuildRequires: cmake
 BuildRequires: pkg-config
 
+%package devel
+Summary: @CMAKE_PROJECT_DESCRIPTION@ (development files)
+Provides: @CMAKE_PROJECT_NAME@-devel
+
+%package devel-static
+Summary: @CMAKE_PROJECT_DESCRIPTION@ (static library)
+Provides: @CMAKE_PROJECT_NAME@-devel-static
+Requires: @CMAKE_PROJECT_NAME@-devel
+
 %description
 @project_long_description@ (shared library)
 
 %description devel
 @project_long_description@ (development files)
+
+%description devel-static
+@project_long_description@ (static library)
 
 %prep
 %setup -q -n %{name}-%{version}
@@ -41,9 +53,8 @@ make install DESTDIR="$RPM_BUILD_ROOT"
 %{_includedir}/%{name}/*.hpp
 %{_datadir}/pkgconfig/*.pc
 
-# %files devel-static
-# %{_libdir}/%{name}-%{version}/*.a
-# Requires: devel
+%files devel-static
+%{_libdir}/%{name}-%{version}/*.a
 
 # TODO: cmake packages config
 # https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html

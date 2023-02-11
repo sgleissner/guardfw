@@ -3,7 +3,7 @@
 Name:          guardfw
 Version:       0.0.3
 Release:       0
-Summary:       Templated C++ wrapper around Linux API functions for proper error handling
+Summary:       Templated C++ wrapper around Linux API functions for proper error handling (shared library)
 License:       MIT
 URL:           http://guardfw.de
 Source:        https://github.com/sgleissner/guardfw/archive/refs/tags/0.0.3.tar.gz
@@ -12,11 +12,23 @@ BuildRequires: gcc13-c++
 BuildRequires: cmake
 BuildRequires: pkg-config
 
+%package devel
+Summary: Templated C++ wrapper around Linux API functions for proper error handling (development files)
+Provides: guardfw-devel
+
+%package devel-static
+Summary: Templated C++ wrapper around Linux API functions for proper error handling (static library)
+Provides: guardfw-devel-static
+Requires: guardfw-devel
+
 %description
 Templated C++ wrapper around Linux API functions for proper error handling. (shared library)
 
 %description devel
 Templated C++ wrapper around Linux API functions for proper error handling. (development files)
+
+%description devel-static
+Templated C++ wrapper around Linux API functions for proper error handling. (static library)
 
 %prep
 %setup -q -n %{name}-%{version}
@@ -41,9 +53,8 @@ make install DESTDIR="$RPM_BUILD_ROOT"
 %{_includedir}/%{name}/*.hpp
 %{_datadir}/pkgconfig/*.pc
 
-# %files devel-static
-# %{_libdir}/%{name}-%{version}/*.a
-# Requires: devel
+%files devel-static
+%{_libdir}/%{name}-%{version}/*.a
 
 # TODO: cmake packages config
 # https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html
