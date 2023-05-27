@@ -106,8 +106,9 @@ add_dependencies(guardfw-tests guardfw-static)
 
 set(file_generated_warning "This is a cmake-generated file, do not edit!")
 
-configure_file(cmake-templates/guardfw.pc.in guardfw.pc @ONLY)
-configure_file(cmake-templates/config.hpp.in guardfw/generated_config.hpp @ONLY)
+configure_file(cmake-templates/${PROJECT_NAME}.pc.in ${PROJECT_NAME}.pc @ONLY)
+configure_file(cmake-templates/config.hpp.in ${PROJECT_NAME}/generated_config.hpp @ONLY)
+file(REMOVE ${CMAKE_SOURCE_DIR}/sonar-project.properties)
 configure_file(cmake-templates/sonar-project.properties.in ${CMAKE_SOURCE_DIR}/sonar-project.properties @ONLY)
 configure_file(cmake-templates/obs-rpm.spec.in ${CMAKE_SOURCE_DIR}/openbuildservice/obs-rpm.spec @ONLY)
 
@@ -124,7 +125,7 @@ set_target_properties(guardfw-static PROPERTIES
         OUTPUT_NAME ${PROJECT_NAME}
         )
 
-include_directories(
+include_directories(BEFORE SYSTEM   # higher priority than older installed library
         src
         ${CMAKE_BINARY_DIR}    # for generated_config.h
 )
