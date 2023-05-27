@@ -10,6 +10,7 @@
  */
 
 #include <sstream>
+#include <format>
 
 #include <guardfw/exceptions.hpp>
 
@@ -17,16 +18,17 @@ namespace GuardFW
 {
 
 std::string WrapperError::build_what(
-	int error, const std::string_view& wrapped_function_name, const std::source_location& location
+    int error, const std::string_view& wrapped_function_name, const std::source_location& location
 )
 {
-	std::ostringstream what;
-	what << "In function '" << location.function_name()		// probably ContextPosix<>::wrapper<>() or guard
-		 << "' in file '" << location.file_name()			// probably wrapped_*.hpp or guard_*.cpp
-		 << "' at line " << location.line()					// probably in wrapped_*.hpp or guard_*.cpp
-		 << ": wrapped call to '" << wrapped_function_name	// wrapped POSIX function name
-		 << "()' failed with error " << error;				// error number
-	return std::move(what).str();
+    return std::format(
+        "In function '{}' in file '{}' at line {}: wrapped call to '{}()' failed with error {}",
+        location.function_name(),
+        location.file_name(),
+        location.line(),
+        wrapped_function_name,
+        error
+    );
 }
 
 }  //  namespace GuardFW
