@@ -1,9 +1,11 @@
 # @file_generated_warning@
-sonar.projectKey=sgleissner_guardfw
+
+# SonarCloud user settings
+sonar.projectKey=sgleissner_@PROJECT_NAME@
 sonar.organization=sgleissner
 
 # This is the name and version displayed in the SonarCloud UI.
-#sonar.projectName=GuardFW
+#sonar.projectName=@PROJECT_NAME@
 sonar.projectVersion=@PROJECT_VERSION@
 
 # Path is relative to the sonar-project.properties file. Replace "\" by "/" on Windows.
@@ -14,12 +16,14 @@ sonar.tests=src/tests/
 # Encoding of the source code. Default is default system encoding
 sonar.sourceEncoding=UTF-8
 
-# disable cache
-sonar.cfamily.cache.enabled=false
+# allow C++23 (experimental)
+# see: https://community.sonarsource.com/t/c-23-support-sonar-scanner-unsupported-value-of-cplusplus-macro/76294/4
+sonar.cfamily.cpp23.enabled=true
 
 # unit test report path
 sonar.testExecutionReportPaths=unittests/reports/unittest-x86_64.xml
 
 # gcov usage
 # https://community.sonarsource.com/t/how-to-make-sonarqube-see-gcovr-cobertura-reports/56270/2
+# https://github.com/sonarsource-cfamily-examples/linux-cmake-gcovr-gh-actions-sc
 sonar.coverageReportPaths=unittests/reports/coverage-x86_64.xml

@@ -13,78 +13,96 @@ jobs:
     env:
       SONAR_SCANNER_VERSION: 4.8.0.2856  # sgl 2023-01-16
       SONAR_SERVER_URL: "https://sonarcloud.io"
-      #      SONAR_SCANNER_VERSION: 4.7.0.2747 # sgl 2022-10-13
-      #      SONAR_SERVER_URL: "https://sonarcloud.io"
+      # see https://binaries.sonarsource.com/?prefix=Distribution/sonar-scanner-cli/
       BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory # Directory where build-wrapper output will be placed
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
-      #      - name: Install gcovr
-      #        run: |
-      #          sudo apt-get update
-      #          sudo apt-get install gcovr
+      - name: Install gcc 13
+        run: |
+          sudo apt-get update
+          sudo apt-get install gcc-13 g++-13
+      - name: Install gcovr 6
+        run: |
+          pip install gcovr
       - name: Install latest Catch2 from git repository
         run: |
           cd $HOME
           git clone https://github.com/catchorg/Catch2.git
           cd $HOME/Catch2/
-          export CC=/usr/bin/gcc-12
-          export CXX=/usr/bin/g++-12
+          export CC=/usr/bin/gcc-13
+          export CXX=/usr/bin/g++-13
           cmake -Bbuild -H. -DBUILD_TESTING=OFF
           sudo cmake --build build/ --target install -j 2
       - name: Build & run unit tests
         run: |
+          echo "### setup ###"
           PRJROOT=$(pwd)
           mkdir -p unittests/64
           mkdir -p unittests/reports
-          export CC=/usr/bin/gcc-12
-          export CXX=/usr/bin/g++-12
-               cmake -D COMPILE_COVERAGE=ON -S . -B unittests/64
-               cmake --build unittests/64/ -j 2
-               pushd unittests/64
-               ./guardfw-tests --reporter console::out=-::colour-mode=ansi --reporter SonarQube::out=../reports/unittest-x86_64.xml
-          #          gcovr -r ../.. --sonarqube ../reports/coverage-x86_64.xml
-               popd
+          export CC=/usr/bin/gcc-13
+          export CXX=/usr/bin/g++-13
+          echo "### run cmake ###"
+          cmake -D COMPILE_COVERAGE=ON -S . -B unittests/64
+          # cmake -D COMPILE_COVERAGE=ON -D COMPILE_32BIT=ON -S . -B unittests/32
+          echo "### run cmake --build ###"
+          cmake --build unittests/64/ -j 2
+          # cmake --build unittests/32/ -j 2
+          pushd unittests/64
+          echo "### run unit tests ###"
+          ./guardfw-tests --reporter console::out=-::colour-mode=ansi --reporter SonarQube::out=../reports/unittest-x86_64.xml
+          echo "### generate gcov files ###"
+          find . -name "*.gcno" -exec xargs gcov-13 -b -l -p -c \{\} \;
+          # find . -name "*.gcno" | xargs gcov-13 -b -l -p -c
+          echo "### run gcovr ###"          
+          gcovr -g -k --root ../.. --sonarqube ../reports/coverage-x86_64.xml --print-summary --gcov-ignore-parse-errors=negative_hits.warn_once_per_file
+          popd
+          # ls -alR .
+          # pushd unittests/32
+          # ./concurrentfw-tests --reporter console::out=-::colour-mode=ansi --reporter SonarQube::out=../reports/unittest-x86.xml
+          # gcovr -r ../.. --sonarqube ../reports/coverage-x86.xml
+          # popd
           # pwd
           # ls -al
           # ls -al unittests/32
           # ls -al unittests/reports
-#      - name: Set up JDK 11
-#        uses: actions/setup-java@v1
-#        with:
-#          java-version: 11
-#      - name: Cache SonarCloud packages
-#        uses: actions/cache@v1
-#        with:
-#          path: ~/.sonar/cache
-#          key: ${{ runner.os }}-sonar
-#          restore-keys: ${{ runner.os }}-sonar
-#      - name: Download and set up sonar-scanner
-#        env:
-#          SONAR_SCANNER_DOWNLOAD_URL: https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${{ env.SONAR_SCANNER_VERSION }}-linux.zip
-#        run: |
-#          mkdir -p $HOME/.sonar
-#          curl -sSLo $HOME/.sonar/sonar-scanner.zip ${{ env.SONAR_SCANNER_DOWNLOAD_URL }}
-#          unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
-#          echo "$HOME/.sonar/sonar-scanner-${{ env.SONAR_SCANNER_VERSION }}-linux/bin" >> $GITHUB_PATH
-#      - name: Download and set up build-wrapper
-#        env:
-#          BUILD_WRAPPER_DOWNLOAD_URL: ${{ env.SONAR_SERVER_URL }}/static/cpp/build-wrapper-linux-x86.zip
-#        run: |
-#          curl -sSLo $HOME/.sonar/build-wrapper-linux-x86.zip ${{ env.BUILD_WRAPPER_DOWNLOAD_URL }}
-#          unzip -o $HOME/.sonar/build-wrapper-linux-x86.zip -d $HOME/.sonar/
-#          echo "$HOME/.sonar/build-wrapper-linux-x86" >> $GITHUB_PATH
-#      - name: Run Sonar build-wrapper
-#        run: |
-#          mkdir build
-#          export CC=/usr/bin/gcc-12
-#          export CXX=/usr/bin/g++-12
-#          cmake -S . -B build
-#          build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build build/ --config Release
-#      - name: Run sonar-scanner
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-#        run: |
-#          sonar-scanner --define sonar.host.url="${{ env.SONAR_SERVER_URL }}" --define sonar.cfamily.build-wrapper-output="${{ env.BUILD_WRAPPER_OUT_DIR }}"
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: 17
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - name: Download and set up sonar-scanner
+        env:
+          SONAR_SCANNER_DOWNLOAD_URL: https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${{ env.SONAR_SCANNER_VERSION }}-linux.zip
+        run: |
+          mkdir -p $HOME/.sonar
+          curl -sSLo $HOME/.sonar/sonar-scanner.zip ${{ env.SONAR_SCANNER_DOWNLOAD_URL }} 
+          unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
+          echo "$HOME/.sonar/sonar-scanner-${{ env.SONAR_SCANNER_VERSION }}-linux/bin" >> $GITHUB_PATH
+      - name: Download and set up build-wrapper
+        env:
+          BUILD_WRAPPER_DOWNLOAD_URL: ${{ env.SONAR_SERVER_URL }}/static/cpp/build-wrapper-linux-x86.zip
+        run: |
+          curl -sSLo $HOME/.sonar/build-wrapper-linux-x86.zip ${{ env.BUILD_WRAPPER_DOWNLOAD_URL }}
+          unzip -o $HOME/.sonar/build-wrapper-linux-x86.zip -d $HOME/.sonar/
+          echo "$HOME/.sonar/build-wrapper-linux-x86" >> $GITHUB_PATH
+      - name: Run Sonar build-wrapper
+        run: |
+          mkdir build
+          export CC=/usr/bin/gcc-13
+          export CXX=/usr/bin/g++-13
+          cmake -S . -B build
+          build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build build/ --config Release
+      - name: Run sonar-scanner
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          sonar-scanner --define sonar.host.url="${{ env.SONAR_SERVER_URL }}" --define sonar.cfamily.build-wrapper-output="${{ env.BUILD_WRAPPER_OUT_DIR }}"
