@@ -16,6 +16,7 @@ AlwaysBreakAfterReturnType: None
 AlwaysBreakTemplateDeclarations: Yes
 BreakBeforeBinaryOperators: All
 BreakBeforeBraces: Custom # enables BraceWrapping
+BreakBeforeInlineASMColon: Always
 BraceWrapping: # modified Allman style
   AfterCaseLabel: true
   AfterClass: true
@@ -74,5 +75,5 @@ SpacesInParentheses: false
 SpacesInSquareBrackets: false
 Standard: c++20
 TabWidth: 4
-UseTab: Always
+UseTab: Never
 ...
