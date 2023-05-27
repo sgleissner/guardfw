@@ -23,4 +23,4 @@ constexpr static FileDescriptor file_descriptor_invalid {-1};
 
 }  // namespace GuardFW
 
-#endif	// GUARDFW_FILE_DESCRIPTOR_HPP
+#endif  // GUARDFW_FILE_DESCRIPTOR_HPP

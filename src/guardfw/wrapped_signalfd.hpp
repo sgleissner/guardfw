@@ -32,4 +32,4 @@ namespace GuardFW
 
 }  // namespace GuardFW
 
-#endif	// GUARDFW_WRAPPED_SIGNALFD_HPP
+#endif  // GUARDFW_WRAPPED_SIGNALFD_HPP

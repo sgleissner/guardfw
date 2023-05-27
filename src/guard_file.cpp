@@ -20,131 +20,131 @@ namespace GuardFW
 {
 
 GuardFile::GuardFile(  // Constructor wrapper for ::open() without mode parameter
-	const char* pathname,
-	Flags flags,
-	const std::source_location& source_location
+    const char* pathname,
+    Flags flags,
+    const std::source_location& source_location
 )
 : Guard(GuardFW::open(pathname, flags(), source_location))
 {}
 
 GuardFile::GuardFile(  // Constructor wrapper for ::open() with mode parameter
-	const char* pathname,
-	Flags flags,
-	Mode mode,
-	const std::source_location& source_location
+    const char* pathname,
+    Flags flags,
+    Mode mode,
+    const std::source_location& source_location
 )
 : Guard(GuardFW::open(pathname, flags(), mode(), source_location))
 {}
 
 GuardFile::GuardFile(  // Constructor wrapper for ::creat()
-	const char* pathname,
-	Mode mode,
-	const std::source_location& source_location
+    const char* pathname,
+    Mode mode,
+    const std::source_location& source_location
 )
 : Guard(GuardFW::creat(pathname, mode(), source_location))
 {}
 
 GuardFile::GuardFile(  // Constructor wrapper for ::openat() without mode parameter
-	FileDescriptor dirfd,
-	const char* pathname,
-	Flags flags,
-	const std::source_location& source_location
+    FileDescriptor dirfd,
+    const char* pathname,
+    Flags flags,
+    const std::source_location& source_location
 )
 : Guard(GuardFW::openat(dirfd, pathname, flags(), source_location))
 {}
 
 GuardFile::GuardFile(  // Constructor wrapper for ::openat() with mode parameter
-	FileDescriptor dirfd,
-	const char* pathname,
-	Flags flags,
-	Mode mode,
-	const std::source_location& source_location
+    FileDescriptor dirfd,
+    const char* pathname,
+    Flags flags,
+    Mode mode,
+    const std::source_location& source_location
 )
 : Guard(GuardFW::openat(dirfd, pathname, flags(), mode(), source_location))
 {}
 
-GuardFile::~GuardFile()	 // Destructor wrapper for ::close()
+GuardFile::~GuardFile()  // Destructor wrapper for ::close()
 {
-	close_on_destruction<GuardFW::close>();	 // may throw
+    close_on_destruction<GuardFW::close>();  // may throw
 }
 
-void GuardFile::ioctl_noretval(	 // wrapper for ::ioctl() without return value
-	unsigned long request,
-	void* ptr,
-	const std::source_location& source_location
+void GuardFile::ioctl_noretval(  // wrapper for ::ioctl() without return value
+    unsigned long request,
+    void* ptr,
+    const std::source_location& source_location
 )
 {
-	GuardFW::ioctl_noretval(handle, request, ptr, source_location);
+    GuardFW::ioctl_noretval(handle, request, ptr, source_location);
 }
 
-[[nodiscard]] int GuardFile::ioctl_retval(	// wrapper for ::ioctl() with return value
-	unsigned long request,
-	void* ptr,
-	const std::source_location& source_location
+[[nodiscard]] int GuardFile::ioctl_retval(  // wrapper for ::ioctl() with return value
+    unsigned long request,
+    void* ptr,
+    const std::source_location& source_location
 )
 {
-	return GuardFW::ioctl_retval(handle, request, ptr, source_location);
+    return GuardFW::ioctl_retval(handle, request, ptr, source_location);
 }
 
 [[nodiscard]] size_t GuardFile::read(  // wrapper for ::read() without blocking prevention
-	void* buf,
-	size_t count,
-	const std::source_location& source_location
+    void* buf,
+    size_t count,
+    const std::source_location& source_location
 )
 {
-	return GuardFW::read(handle, buf, count, source_location);
+    return GuardFW::read(handle, buf, count, source_location);
 }
 
 [[nodiscard]] std::optional<size_t> GuardFile::read_nonblock(  // wrapper for ::read() with blocking prevention
-	void* buf,
-	size_t count,
-	const std::source_location& source_location
+    void* buf,
+    size_t count,
+    const std::source_location& source_location
 )
 {
-	return GuardFW::read_nonblock(handle, buf, count, source_location);
+    return GuardFW::read_nonblock(handle, buf, count, source_location);
 }
 
-[[nodiscard]] size_t GuardFile::write(	// wrapper for ::write() without blocking prevention
-	void* buf,
-	size_t count,
-	const std::source_location& source_location
+[[nodiscard]] size_t GuardFile::write(  // wrapper for ::write() without blocking prevention
+    void* buf,
+    size_t count,
+    const std::source_location& source_location
 )
 {
-	return GuardFW::write(handle, buf, count, source_location);
+    return GuardFW::write(handle, buf, count, source_location);
 }
 
-[[nodiscard]] std::optional<size_t> GuardFile::write_nonblock(	// wrapper for ::write() with blocking prevention
-	void* buf,
-	size_t count,
-	const std::source_location& source_location
+[[nodiscard]] std::optional<size_t> GuardFile::write_nonblock(  // wrapper for ::write() with blocking prevention
+    void* buf,
+    size_t count,
+    const std::source_location& source_location
 )
 {
-	return GuardFW::write_nonblock(handle, buf, count, source_location);
+    return GuardFW::write_nonblock(handle, buf, count, source_location);
 }
 
-void GuardFile::syncfs(	 // wrapper for ::syncfs()
-	const std::source_location& source_location
+void GuardFile::syncfs(  // wrapper for ::syncfs()
+    const std::source_location& source_location
 )
 {
-	GuardFW::syncfs(handle, source_location);
+    GuardFW::syncfs(handle, source_location);
 }
 
 [[nodiscard]] off_t GuardFile::lseek(  // wrapper for ::lseek
-	off_t offset,
-	int whence,
-	const std::source_location& source_location
+    off_t offset,
+    int whence,
+    const std::source_location& source_location
 )
 {
-	return GuardFW::lseek(handle, offset, whence, source_location);
+    return GuardFW::lseek(handle, offset, whence, source_location);
 }
 
 [[nodiscard]] off64_t GuardFile::lseek64(  // wrapper for ::lseek64
-	off64_t offset,
-	int whence,
-	const std::source_location& source_location
+    off64_t offset,
+    int whence,
+    const std::source_location& source_location
 )
 {
-	return GuardFW::lseek64(handle, offset, whence, source_location);
+    return GuardFW::lseek64(handle, offset, whence, source_location);
 }
 
 }  // namespace GuardFW

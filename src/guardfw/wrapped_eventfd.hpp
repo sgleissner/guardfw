@@ -22,12 +22,12 @@ namespace GuardFW
 {
 
 [[nodiscard]] inline static FileDescriptor eventfd(
-	unsigned int initval, int flags, const std::source_location& source_location = std::source_location::current()
+    unsigned int initval, int flags, const std::source_location& source_location = std::source_location::current()
 )
 {
-	return ContextStd::wrapper<::eventfd>(source_location, initval, flags);
+    return ContextStd::wrapper<::eventfd>(source_location, initval, flags);
 }
 
 }  // namespace GuardFW
 
-#endif	// GUARDFW_WRAPPED_EVENTFD_HPP
+#endif  // GUARDFW_WRAPPED_EVENTFD_HPP

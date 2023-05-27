@@ -41,7 +41,7 @@ static RETURN_TYPE return_type(RETURN_TYPE (*)(ARGS...));  // forward declaratio
  * @return Undefined object of type R. This return type will be analysed with decltype().
  */
 template<typename RETURN_TYPE, typename... ARGS>
-static RETURN_TYPE return_type(RETURN_TYPE (*)(ARGS..., ...));	// forward declaration only for decltype
+static RETURN_TYPE return_type(RETURN_TYPE (*)(ARGS..., ...));  // forward declaration only for decltype
 
 /**
  * Helper type for return type deduction of function pointer
@@ -59,7 +59,7 @@ using ReturnType = decltype(return_type(FUNCTION_POINTER));
 template<typename T>
 consteval bool is_function_pointer(T)
 {
-	return false;
+    return false;
 };
 
 /**
@@ -72,7 +72,7 @@ consteval bool is_function_pointer(T)
 template<class RETURN_TYPE, class... ARGS>
 consteval bool is_function_pointer(RETURN_TYPE (*)(ARGS...))
 {
-	return true;
+    return true;
 };
 
 /**
@@ -85,7 +85,7 @@ consteval bool is_function_pointer(RETURN_TYPE (*)(ARGS...))
 template<class RETURN_TYPE, class... ARGS>
 consteval bool is_function_pointer(RETURN_TYPE (*)(ARGS...) noexcept)
 {
-	return true;
+    return true;
 };
 
 /**
@@ -98,7 +98,7 @@ consteval bool is_function_pointer(RETURN_TYPE (*)(ARGS...) noexcept)
 template<class RETURN_TYPE, class... ARGS>
 consteval bool is_function_pointer(RETURN_TYPE (*)(ARGS..., ...))
 {
-	return true;
+    return true;
 };
 
 /**
@@ -111,7 +111,7 @@ consteval bool is_function_pointer(RETURN_TYPE (*)(ARGS..., ...))
 template<class RETURN_TYPE, class... ARGS>
 consteval bool is_function_pointer(RETURN_TYPE (*)(ARGS..., ...) noexcept)
 {
-	return true;
+    return true;
 };
 
 
@@ -124,21 +124,21 @@ consteval bool is_function_pointer(RETURN_TYPE (*)(ARGS..., ...) noexcept)
 template<auto FUNCTION_POINTER>
 consteval static std::string_view name_of()
 {
-	static_assert(GuardFW::is_function_pointer(FUNCTION_POINTER), "name_of() works only with function pointers.");
+    static_assert(GuardFW::is_function_pointer(FUNCTION_POINTER), "name_of() works only with function pointers.");
 
-	const char* start = __PRETTY_FUNCTION__;  // reads FUNCTION_POINTER as part of full function name
-	while (*start != '\0' && *start != '=')
-		start++;
-	if (*start != '\0')
-		start++;
-	if (*start != '\0')
-		start++;
-	const char* end = start;
-	while (*end != '\0' && *end != ';')
-		end++;
-	return std::string_view(start, static_cast<size_t>(end - start));
+    const char* start = __PRETTY_FUNCTION__;  // reads FUNCTION_POINTER as part of full function name
+    while (*start != '\0' && *start != '=')
+        start++;
+    if (*start != '\0')
+        start++;
+    if (*start != '\0')
+        start++;
+    const char* end = start;
+    while (*end != '\0' && *end != ';')
+        end++;
+    return std::string_view(start, static_cast<size_t>(end - start));
 }
 
 }  //  namespace GuardFW
 
-#endif	//GUARDFW_TRAITS_HPP
+#endif  //GUARDFW_TRAITS_HPP

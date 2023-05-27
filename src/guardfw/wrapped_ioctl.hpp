@@ -22,25 +22,25 @@ namespace GuardFW
 {
 
 inline static void ioctl_noretval(
-	FileDescriptor fd,
-	unsigned long request,
-	void* ptr,
-	const std::source_location& source_location = std::source_location::current()
+    FileDescriptor fd,
+    unsigned long request,
+    void* ptr,
+    const std::source_location& source_location = std::source_location::current()
 )
 {
-	ContextStd::wrapper<::ioctl, void>(source_location, fd, request, ptr);
+    ContextStd::wrapper<::ioctl, void>(source_location, fd, request, ptr);
 }
 
 [[nodiscard]] inline static int ioctl_retval(
-	FileDescriptor fd,
-	unsigned long request,
-	void* ptr,
-	const std::source_location& source_location = std::source_location::current()
+    FileDescriptor fd,
+    unsigned long request,
+    void* ptr,
+    const std::source_location& source_location = std::source_location::current()
 )
 {
-	return ContextStd::wrapper<::ioctl>(source_location, fd, request, ptr);
+    return ContextStd::wrapper<::ioctl>(source_location, fd, request, ptr);
 }
 
 }  // namespace GuardFW
 
-#endif	// GUARDFW_WRAPPED_IOCTL_HPP
+#endif  // GUARDFW_WRAPPED_IOCTL_HPP

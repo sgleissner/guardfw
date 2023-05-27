@@ -31,42 +31,42 @@ GuardTimer::GuardTimer(GuardTimer&& move)
 
 GuardTimer::~GuardTimer()
 {
-	close_on_destruction<GuardFW::close>();	 // may throw
+    close_on_destruction<GuardFW::close>();  // may throw
 }
 
 uint64_t GuardTimer::get_expirations() const
 {
-	uint64_t expirations;
-	std::optional<size_t> retval = GuardFW::read_nonblock(handle, &expirations, sizeof(expirations));
-	return (retval && *retval == sizeof(expirations)) ? expirations : 0;
+    uint64_t expirations;
+    std::optional<size_t> retval = GuardFW::read_nonblock(handle, &expirations, sizeof(expirations));
+    return (retval && *retval == sizeof(expirations)) ? expirations : 0;
 }
 
 void GuardTimer::set_expirations(uint64_t expirations) const
 {
-	GuardFW::ioctl_noretval(handle, TFD_IOC_SET_TICKS, &expirations);
+    GuardFW::ioctl_noretval(handle, TFD_IOC_SET_TICKS, &expirations);
 }
 
 void GuardTimer::set_time(int flags, const struct itimerspec& new_value, struct itimerspec& old_value) const
 {
-	GuardFW::timerfd_settime(handle, flags, &new_value, &old_value);
+    GuardFW::timerfd_settime(handle, flags, &new_value, &old_value);
 }
 
 void GuardTimer::set_time(int flags, const struct itimerspec& new_value) const
 {
-	GuardFW::timerfd_settime(handle, flags, &new_value, nullptr);
+    GuardFW::timerfd_settime(handle, flags, &new_value, nullptr);
 }
 
 void GuardTimer::get_time(struct itimerspec& curr_value) const
 {
-	GuardFW::timerfd_gettime(handle, &curr_value);
+    GuardFW::timerfd_gettime(handle, &curr_value);
 }
 
 void GuardTimer::start(const TimeFraction interval, int flags) const
 {
-	time_t tv_set = calc_time_fraction_s(interval);
-	long tv_nsec = calc_time_fraction_ns(interval);
+    time_t tv_set = calc_time_fraction_s(interval);
+    long tv_nsec = calc_time_fraction_ns(interval);
 
-	set_time(flags, itimerspec
+    set_time(flags, itimerspec
 			 {
 				 .it_interval = {
 					 .tv_sec = tv_set,
@@ -81,7 +81,7 @@ void GuardTimer::start(const TimeFraction interval, int flags) const
 
 void GuardTimer::start(const TimeFraction initial, const TimeFraction interval, int flags) const
 {
-	set_time(flags, itimerspec
+    set_time(flags, itimerspec
 			 {
 				 .it_interval = {
 					 .tv_sec = calc_time_fraction_s(interval),
@@ -96,7 +96,7 @@ void GuardTimer::start(const TimeFraction initial, const TimeFraction interval, 
 
 void GuardTimer::start(const time_t interval_s, const long interval_ns, int flags) const
 {
-	set_time(flags, itimerspec
+    set_time(flags, itimerspec
 			 {
 				 .it_interval = {
 					 .tv_sec = interval_s,
@@ -110,10 +110,10 @@ void GuardTimer::start(const time_t interval_s, const long interval_ns, int flag
 }
 
 void GuardTimer::start(
-	const time_t initial_s, const long initial_ns, const time_t interval_s, const long interval_ns, int flags
+    const time_t initial_s, const long initial_ns, const time_t interval_s, const long interval_ns, int flags
 ) const
 {
-	set_time(flags, itimerspec
+    set_time(flags, itimerspec
 			 {
 				 .it_interval = {
 					 .tv_sec = interval_s,
@@ -128,22 +128,22 @@ void GuardTimer::start(
 
 void GuardTimer::stop() const
 {
-	set_time(0, itimerspec {});
+    set_time(0, itimerspec {});
 }
 
 GuardTimer::TimeFraction GuardTimer::calc_time_fraction(time_t time_s, long time_ns) noexcept
 {
-	return ((uint64_t(time_ns) * 18446744074u) >> 32) | (uint64_t(time_s) << 32);
+    return ((uint64_t(time_ns) * 18446744074u) >> 32) | (uint64_t(time_s) << 32);
 }
 
 time_t GuardTimer::calc_time_fraction_s(GuardTimer::TimeFraction time_frac) noexcept
 {
-	return time_t(time_frac >> 32);
+    return time_t(time_frac >> 32);
 }
 
 long GuardTimer::calc_time_fraction_ns(GuardTimer::TimeFraction time_frac) noexcept
 {
-	return long(((time_frac & 0x00000000FFFFFFFFll) * 1000000000u) >> 32);
+    return long(((time_frac & 0x00000000FFFFFFFFll) * 1000000000u) >> 32);
 }
 
 }  // namespace GuardFW
