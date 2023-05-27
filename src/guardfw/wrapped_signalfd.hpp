@@ -15,19 +15,19 @@
 
 #include <sys/signalfd.h>
 
-#include <guardfw/context_posix.hpp>
+#include <guardfw/wrapper.hpp>
 
 namespace GuardFW
 {
 
 [[nodiscard]] inline static int signalfd(
-	int fd,
-	const sigset_t* mask,
-	int flags,
-	const std::source_location& source_location = std::source_location::current()
+    FileDescriptor fd,
+    const sigset_t* mask,
+    int flags,
+    const std::source_location& source_location = std::source_location::current()
 )
 {
-	return ContextPosix_Std::wrapper<::signalfd>(source_location, fd, mask, flags);
+    return ContextStd::wrapper<::signalfd>(source_location, fd, mask, flags);
 }
 
 }  // namespace GuardFW
