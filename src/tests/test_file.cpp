@@ -12,11 +12,11 @@
 
 bool test_file(const char* filename)
 {
-	GuardFW::GuardFile file(filename, GuardFW::GuardFile::Flags(O_RDONLY));
-	return true;
+    GuardFW::GuardFile file(filename, GuardFW::GuardFile::Flags(O_RDONLY));
+    return true;
 }
 
 TEST_CASE("file: open, read, close", "[file]")
 {
-	CHECK_NOTHROW(test_file("/proc/meminfo"));
+    CHECK_NOTHROW(test_file("/proc/meminfo"));
 }

@@ -15,19 +15,19 @@
 
 #include <cstdint>
 
-#include <guardfw/generated_config.hpp>	 // gets generated constants from CMakeLists.txt
+#include <guardfw/generated_config.hpp>  // gets generated constants from CMakeLists.txt
 
 namespace GuardFW
 {
 
 struct Version
 {
-	static constexpr uint16_t MAJOR {GUARDFW_VERSION_MAJOR};
-	static constexpr uint16_t MINOR {GUARDFW_VERSION_MINOR};
-	static constexpr uint16_t PATCH {GUARDFW_VERSION_PATCH};
-	//	static constexpr uint16_t TWEAK {GUARDFW_VERSION_TWEAK};
+    static constexpr uint16_t MAJOR {GUARDFW_VERSION_MAJOR};
+    static constexpr uint16_t MINOR {GUARDFW_VERSION_MINOR};
+    static constexpr uint16_t PATCH {GUARDFW_VERSION_PATCH};
+    //	static constexpr uint16_t TWEAK {GUARDFW_VERSION_TWEAK};
 };
 
 }  // namespace GuardFW
 
-#endif	// GUARDFW_VERSION_HPP
+#endif  // GUARDFW_VERSION_HPP

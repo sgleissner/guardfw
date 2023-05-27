@@ -24,16 +24,16 @@ namespace GuardFW
 class WrapperError : public std::system_error
 {
 public:
-	WrapperError(int error, const std::string_view& wrapped_function_name, const std::source_location& location)
-	: system_error(error, std::system_category(), build_what(error, wrapped_function_name, location))
-	{}
+    WrapperError(int error, const std::string_view& wrapped_function_name, const std::source_location& location)
+    : system_error(error, std::system_category(), build_what(error, wrapped_function_name, location))
+    {}
 
 private:
-	static std::string build_what(
-		int error, const std::string_view& wrapped_function_name, const std::source_location& location
-	);
+    static std::string build_what(
+        int error, const std::string_view& wrapped_function_name, const std::source_location& location
+    );
 };
 
 }  //  namespace GuardFW
 
-#endif	// GUARDFW_EXCEPTIONS_HPP
+#endif  // GUARDFW_EXCEPTIONS_HPP

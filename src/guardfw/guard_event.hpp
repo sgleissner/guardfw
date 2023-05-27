@@ -25,19 +25,19 @@ namespace GuardFW
 class GuardEvent : Guard<FileDescriptor, file_descriptor_invalid>
 {
 public:
-	GuardEvent() = delete;
-	GuardEvent(const GuardEvent&) = delete;
-	GuardEvent& operator=(const GuardEvent&) = delete;
-	GuardEvent& operator=(GuardEvent&&) = delete;
+    GuardEvent() = delete;
+    GuardEvent(const GuardEvent&) = delete;
+    GuardEvent& operator=(const GuardEvent&) = delete;
+    GuardEvent& operator=(GuardEvent&&) = delete;
 
-	GuardEvent(unsigned int initval, int flags);
-	GuardEvent(GuardEvent&& move);
-	virtual ~GuardEvent() override;
+    GuardEvent(unsigned int initval, int flags);
+    GuardEvent(GuardEvent&& move);
+    virtual ~GuardEvent() override;
 
-	uint64_t get_counter() const;
-	void add_couter(uint64_t add_to_counter) const;
+    uint64_t get_counter() const;
+    void add_couter(uint64_t add_to_counter) const;
 };
 
 }  // namespace GuardFW
 
-#endif	//GUARDFW_GUARD_EVENT_HPP
+#endif  //GUARDFW_GUARD_EVENT_HPP

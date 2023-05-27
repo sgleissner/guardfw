@@ -21,19 +21,19 @@ namespace GuardFW
 {
 
 [[nodiscard]] inline static int getpriority(
-	int which, id_t who, const std::source_location& source_location = std::source_location::current()
+    int which, id_t who, const std::source_location& source_location = std::source_location::current()
 )
 {
-	return ContextMinus1ErrnoChanged::wrapper<::getpriority>(source_location, which, who);
+    return ContextMinus1ErrnoChanged::wrapper<::getpriority>(source_location, which, who);
 }
 
 inline static void setpriority(
-	int which, id_t who, int prio, const std::source_location& source_location = std::source_location::current()
+    int which, id_t who, int prio, const std::source_location& source_location = std::source_location::current()
 )
 {
-	ContextStd::wrapper<::setpriority, void>(source_location, which, who, prio);
+    ContextStd::wrapper<::setpriority, void>(source_location, which, who, prio);
 }
 
 }  // namespace GuardFW
 
-#endif	// GUARDFW_WRAPPED_RESOURCE_HPP
+#endif  // GUARDFW_WRAPPED_RESOURCE_HPP
