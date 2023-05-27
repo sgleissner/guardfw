@@ -20,7 +20,7 @@
 namespace GuardFW
 {
 
-class GuardSignal : Guard<FileDescriptor, file_descriptor_invalid>
+class GuardSignal : public Guard<FileDescriptor, file_descriptor_invalid>
 {
 public:
     GuardSignal(
