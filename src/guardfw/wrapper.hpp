@@ -23,6 +23,7 @@
 
 #include <errno.h>	// EAGAIN/EWOULDBLOCK
 
+#include <cstdint>
 #include <expected>
 #include <optional>
 #include <type_traits>
