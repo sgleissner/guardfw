@@ -61,6 +61,8 @@ set(public_headers
         src/guardfw/guard.hpp
         src/guardfw/guard_event.hpp
         src/guardfw/guard_file.hpp
+        src/guardfw/guard_message.hpp
+        src/guardfw/guard_signal.hpp
         src/guardfw/guard_timer.hpp
         src/guardfw/traits.hpp
         src/guardfw/version.hpp
@@ -81,6 +83,8 @@ set(library_sources
         src/exceptions.cpp
         src/guard_event.cpp
         src/guard_file.cpp
+        src/guard_message.cpp
+        src/guard_signal.cpp
         src/guard_timer.cpp
         )
 
@@ -128,7 +132,7 @@ set_target_properties(guardfw-static PROPERTIES
 include_directories(BEFORE SYSTEM   # higher priority than older installed library
         src
         ${CMAKE_BINARY_DIR}    # for generated_config.h
-)
+        )
 
 target_link_libraries(guardfw-tests PRIVATE
         Catch2::Catch2WithMain
