@@ -21,7 +21,7 @@
 namespace GuardFW
 {
 
-inline static void ioctl_noretval(
+[[gnu::always_inline]] inline static void ioctl_noretval(
     FileDescriptor fd,
     unsigned long request,
     void* ptr,
@@ -31,7 +31,7 @@ inline static void ioctl_noretval(
     ContextStd::wrapper<::ioctl, void>(source_location, fd, request, ptr);
 }
 
-[[nodiscard]] inline static int ioctl_retval(
+[[gnu::always_inline, nodiscard]] inline static int ioctl_retval(
     FileDescriptor fd,
     unsigned long request,
     void* ptr,
