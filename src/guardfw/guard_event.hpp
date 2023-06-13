@@ -22,7 +22,7 @@
 namespace GuardFW
 {
 
-class GuardEvent : Guard<FileDescriptor, file_descriptor_invalid>
+class GuardEvent : GuardFileDescriptor
 {
 public:
     GuardEvent() = delete;

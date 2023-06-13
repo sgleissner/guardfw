@@ -18,7 +18,7 @@ namespace GuardFW
 {
 
 GuardSignal::GuardSignal(int fd, const sigset_t* mask, int flags, const std::source_location& source_location)
-: Guard(GuardFW::signalfd(fd, mask, flags, source_location))
+: GuardFileDescriptor(GuardFW::signalfd(fd, mask, flags, source_location))
 {}
 
 

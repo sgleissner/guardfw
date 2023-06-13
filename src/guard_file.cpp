@@ -24,7 +24,7 @@ GuardFile::GuardFile(  // Constructor wrapper for ::open() without mode paramete
     Flags flags,
     const std::source_location& source_location
 )
-: Guard(GuardFW::open(pathname, flags(), source_location))
+: GuardFileDescriptor(GuardFW::open(pathname, flags(), source_location))
 {}
 
 GuardFile::GuardFile(  // Constructor wrapper for ::open() with mode parameter
@@ -33,7 +33,7 @@ GuardFile::GuardFile(  // Constructor wrapper for ::open() with mode parameter
     Mode mode,
     const std::source_location& source_location
 )
-: Guard(GuardFW::open(pathname, flags(), mode(), source_location))
+: GuardFileDescriptor(GuardFW::open(pathname, flags(), mode(), source_location))
 {}
 
 GuardFile::GuardFile(  // Constructor wrapper for ::creat()
@@ -41,7 +41,7 @@ GuardFile::GuardFile(  // Constructor wrapper for ::creat()
     Mode mode,
     const std::source_location& source_location
 )
-: Guard(GuardFW::creat(pathname, mode(), source_location))
+: GuardFileDescriptor(GuardFW::creat(pathname, mode(), source_location))
 {}
 
 GuardFile::GuardFile(  // Constructor wrapper for ::openat() without mode parameter
@@ -50,7 +50,7 @@ GuardFile::GuardFile(  // Constructor wrapper for ::openat() without mode parame
     Flags flags,
     const std::source_location& source_location
 )
-: Guard(GuardFW::openat(dirfd, pathname, flags(), source_location))
+: GuardFileDescriptor(GuardFW::openat(dirfd, pathname, flags(), source_location))
 {}
 
 GuardFile::GuardFile(  // Constructor wrapper for ::openat() with mode parameter
@@ -60,7 +60,7 @@ GuardFile::GuardFile(  // Constructor wrapper for ::openat() with mode parameter
     Mode mode,
     const std::source_location& source_location
 )
-: Guard(GuardFW::openat(dirfd, pathname, flags(), mode(), source_location))
+: GuardFileDescriptor(GuardFW::openat(dirfd, pathname, flags(), mode(), source_location))
 {}
 
 GuardFile::~GuardFile()  // Destructor wrapper for ::close()

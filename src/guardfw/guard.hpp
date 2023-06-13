@@ -15,8 +15,12 @@
 #ifndef GUARDFW_GUARD_HPP
 #define GUARDFW_GUARD_HPP
 
-#include <stdexcept>
-#include <source_location>
+#include <stdexcept>        // std::logic_error
+#include <source_location>  // std::source_location
+#include <cstdio>           // FILE
+
+#include <guardfw/file_descriptor.hpp>
+#include <guardfw/wrapped_fcntl.hpp>
 
 namespace GuardFW
 {
@@ -108,6 +112,76 @@ protected:
 protected:
     Handle handle;  ///< guarded handle, might be set to invalid_handle only by a lvalue move operation.
 };
+
+/**
+ * Specialized guard class for file descriptor based guards.
+ */
+class GuardFileDescriptor : public Guard<FileDescriptor, file_descriptor_invalid>
+{
+protected:
+    GuardFileDescriptor() = delete;
+    GuardFileDescriptor(const GuardFileDescriptor&) = delete;
+    GuardFileDescriptor& operator=(const GuardFileDescriptor&) = delete;
+    GuardFileDescriptor& operator=(GuardFileDescriptor&&) = delete;
+
+    explicit GuardFileDescriptor(FileDescriptor handle_init)
+    : Guard(handle_init)
+    {}
+
+    GuardFileDescriptor(GuardFileDescriptor&& move)
+    : Guard(std::move(move))
+    {}
+
+public:
+    virtual ~GuardFileDescriptor() = default;
+
+protected:
+    template<FcntlResultConcept RESULT>
+    [[nodiscard]] inline RESULT fcntl(FileDescriptor fd, int cmd)
+    {
+        if constexpr (std::is_same_v<RESULT, int>)
+            return fcntl_retval(fd, cmd);
+        else if constexpr (std::is_same_v<RESULT, unsigned int>)
+            return fcntl_retval_unsigned(fd, cmd);
+        else  // constexpr std::is_void_v<RESULT>
+            fcntl_noretval(fd, cmd);
+    }
+
+    template<FcntlResultConcept RESULT, FcntlArgConcept ARG>
+    [[nodiscard]] inline RESULT fcntl(FileDescriptor fd, int cmd, ARG arg)
+    {
+        if constexpr (std::is_same_v<RESULT, int>)
+            return fcntl_retval(fd, cmd, arg);
+        else if constexpr (std::is_same_v<RESULT, unsigned int>)
+            return fcntl_retval_unsigned(fd, cmd, arg);
+        else  // constexpr std::is_void_v<RESULT>
+            fcntl_noretval(fd, cmd, arg);
+    }
+};
+
+/**
+ * Specialized guard class for FILE* based guards.
+ */
+class GuardFileStream : public Guard<FILE*, nullptr>
+{
+protected:
+    GuardFileStream() = delete;
+    GuardFileStream(const GuardFileStream&) = delete;
+    GuardFileStream& operator=(const GuardFileStream&) = delete;
+    GuardFileStream& operator=(GuardFileStream&&) = delete;
+
+    explicit GuardFileStream(FILE* handle_init)
+    : Guard(handle_init)
+    {}
+
+    GuardFileStream(GuardFileStream&& move)
+    : Guard(std::move(move))
+    {}
+
+public:
+    virtual ~GuardFileStream() = default;
+};
+
 
 /**
  * The wrapper TypeGuard<> is used in overloaded constructors to avoid ambiguity of similar argument types.

@@ -22,11 +22,11 @@ namespace GuardFW
 {
 
 GuardEvent::GuardEvent(unsigned int initval, int flags)
-: Guard(GuardFW::eventfd(initval, flags))
+: GuardFileDescriptor(GuardFW::eventfd(initval, flags))
 {}
 
 GuardEvent::GuardEvent(GuardEvent&& move)
-: Guard(std::move(move))
+: GuardFileDescriptor(std::move(move))
 {}
 
 GuardEvent::~GuardEvent()

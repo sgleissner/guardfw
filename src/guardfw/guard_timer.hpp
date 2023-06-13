@@ -22,7 +22,7 @@
 namespace GuardFW
 {
 
-class GuardTimer : Guard<FileDescriptor, file_descriptor_invalid>
+class GuardTimer : GuardFileDescriptor
 {
 public:
     using TimeFraction = uint64_t;
