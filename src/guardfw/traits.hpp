@@ -70,7 +70,7 @@ consteval bool is_function_pointer(T)
  * @return             Always true.
  */
 template<class RETURN_TYPE, class... ARGS>
-consteval bool is_function_pointer(RETURN_TYPE (*)(ARGS...))
+consteval bool is_function_pointer(RETURN_TYPE (*)(ARGS...))  // NOSONAR: function pointer allowed
 {
     return true;
 };
@@ -83,7 +83,7 @@ consteval bool is_function_pointer(RETURN_TYPE (*)(ARGS...))
  * @return             Always true.
  */
 template<class RETURN_TYPE, class... ARGS>
-consteval bool is_function_pointer(RETURN_TYPE (*)(ARGS...) noexcept)
+consteval bool is_function_pointer(RETURN_TYPE (*)(ARGS...) noexcept)  // NOSONAR: function pointer allowed
 {
     return true;
 };
@@ -96,7 +96,7 @@ consteval bool is_function_pointer(RETURN_TYPE (*)(ARGS...) noexcept)
  * @return             Always true.
  */
 template<class RETURN_TYPE, class... ARGS>
-consteval bool is_function_pointer(RETURN_TYPE (*)(ARGS..., ...))
+consteval bool is_function_pointer(RETURN_TYPE (*)(ARGS..., ...))  // NOSONAR: function pointer allowed
 {
     return true;
 };
@@ -109,7 +109,7 @@ consteval bool is_function_pointer(RETURN_TYPE (*)(ARGS..., ...))
  * @return             Always true.
  */
 template<class RETURN_TYPE, class... ARGS>
-consteval bool is_function_pointer(RETURN_TYPE (*)(ARGS..., ...) noexcept)
+consteval bool is_function_pointer(RETURN_TYPE (*)(ARGS..., ...) noexcept)  // NOSONAR: function pointer allowed
 {
     return true;
 };

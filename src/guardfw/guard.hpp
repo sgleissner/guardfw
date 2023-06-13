@@ -49,20 +49,20 @@ protected:
     Guard& operator=(Guard&&) = delete;
 
     /**
-	 * Standard constructor for base guard class.
-	 * Will be called from derived class constructors for storing the handle.
-	 * @param handle_init handle to store.
-	 */
+     * Standard constructor for base guard class.
+     * Will be called from derived class constructors for storing the handle.
+     * @param handle_init handle to store.
+     */
     explicit Guard(Handle handle_init)
     : handle(handle_init)
     {}
 
     /**
-	 * Move constructor for base guard class.
-	 * Will be called from derived class move constructors for moving the guarded handle in a safe way.
-	 * @param move
-	 */
-    Guard(Guard&& move)
+     * Move constructor for base guard class.
+     * Will be called from derived class move constructors for moving the guarded handle in a safe way.
+     * @param move
+     */
+    Guard(Guard&& move) noexcept
     : handle(move.handle)
     {
         move.handle = invalid_handle;
@@ -70,33 +70,33 @@ protected:
 
 public:
     /**
-	 * Destructor for base guard class.
-	 * Checks, if the handle has not been correctly removed either by the derived destructor or a move operation.
-	 */
+     * Destructor for base guard class.
+     * Checks, if the handle has not been correctly removed either by the derived destructor or a move operation.
+     */
     virtual ~Guard()
     {
         if (handle != invalid_handle)
-            throw std::logic_error("invalid handle in destructor GuardFW::Guard::~Guard()");
+            throw std::runtime_error("invalid handle in destructor GuardFW::Guard::~Guard()");
     }
 
     /**
-	 * Queries the guarded handle.
-	 * @return guarded handle
-	 */
+     * Queries the guarded handle.
+     * @return guarded handle
+     */
     Handle get_handle() const
     {
         if (handle == invalid_handle)
-            throw std::logic_error("invalid handle in GuardFW::Guard::get_handle()");
+            throw std::runtime_error("invalid handle in GuardFW::Guard::get_handle()");
         return handle;
     }
 
 protected:
     /**
-	 * Wrapper for a handle closing function.
-	 * Will close the handle and invalidates it.
-	 * @tparam CLOSE          function pointer to a void(*)(Handle, const std::source_location&) closing function.
-	 * @param source_location Optional source location object for throwing an exception in case of a close error.
-	 */
+     * Wrapper for a handle closing function.
+     * Will close the handle and invalidates it.
+     * @tparam CLOSE          function pointer to a void(*)(Handle, const std::source_location&) closing function.
+     * @param source_location Optional source location object for throwing an exception in case of a close error.
+     */
     template<auto CLOSE>
     [[gnu::always_inline]] inline void close_on_destruction(
         const std::source_location& source_location = std::source_location::current()
@@ -128,12 +128,12 @@ protected:
     : Guard(handle_init)
     {}
 
-    GuardFileDescriptor(GuardFileDescriptor&& move)
+    GuardFileDescriptor(GuardFileDescriptor&& move) noexcept
     : Guard(std::move(move))
     {}
 
 public:
-    virtual ~GuardFileDescriptor() = default;
+    virtual ~GuardFileDescriptor() override = default;
 
 protected:
     template<FcntlResultConcept RESULT>
@@ -174,12 +174,12 @@ protected:
     : Guard(handle_init)
     {}
 
-    GuardFileStream(GuardFileStream&& move)
+    GuardFileStream(GuardFileStream&& move) noexcept
     : Guard(std::move(move))
     {}
 
 public:
-    virtual ~GuardFileStream() = default;
+    virtual ~GuardFileStream() override = default;
 };
 
 
@@ -191,7 +191,7 @@ template<typename T>
 class TypeGuard
 {
 public:
-    TypeGuard(T init)
+    explicit TypeGuard(T init)
     : t(init)
     {}
 

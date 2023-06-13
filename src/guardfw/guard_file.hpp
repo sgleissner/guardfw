@@ -24,18 +24,23 @@
 namespace GuardFW
 {
 
-class GuardFile : GuardFileDescriptor
+class GuardFile : public GuardFileDescriptor
 {
 public:
     using Flags = TypeGuard<int>;
     using Mode = TypeGuard<mode_t>;
 
+    GuardFile() = delete;
+    GuardFile(const GuardFile&) = delete;
+    GuardFile& operator=(const GuardFile&) = delete;
+    GuardFile& operator=(GuardFile&&) = delete;
+
     /**
-	 * Constructor wrapper for ::open() without mode parameter
-	 * @param pathname        see 'man 2 open'
-	 * @param flag            sse 'man 2 open'
-	 * @param source_location calling location, used in case of an exceotion
-	 */
+     * Constructor wrapper for ::open() without mode parameter
+     * @param pathname        see 'man 2 open'
+     * @param flag            sse 'man 2 open'
+     * @param source_location calling location, used in case of an exceotion
+     */
     explicit GuardFile(
         const char* pathname,  // see 'man 2 open'
         Flags flags,           // see 'man 2 open'
@@ -43,12 +48,12 @@ public:
     );
 
     /**
-	 * Constructor wrapper for ::open() with mode parameter
-	 * @param pathname        see 'man 2 open'
-	 * @param flags           see 'man 2 open'
-	 * @param mode            see 'man 2 open'
-	 * @param source_location calling location, used in case of an exceotion
-	 */
+     * Constructor wrapper for ::open() with mode parameter
+     * @param pathname        see 'man 2 open'
+     * @param flags           see 'man 2 open'
+     * @param mode            see 'man 2 open'
+     * @param source_location calling location, used in case of an exceotion
+     */
     explicit GuardFile(
         const char* pathname,  // see 'man 2 open'
         Flags flags,           // see 'man 2 open'
@@ -57,11 +62,11 @@ public:
     );
 
     /**
-	 * Constructor wrapper for ::creat() with mode parameter
-	 * @param pathname        see 'man 2 open'
-	 * @param mode            see 'man 2 open'
-	 * @param source_location calling location, used in case of an exceotion
-	 */
+     * Constructor wrapper for ::creat() with mode parameter
+     * @param pathname        see 'man 2 open'
+     * @param mode            see 'man 2 open'
+     * @param source_location calling location, used in case of an exceotion
+     */
     explicit GuardFile(
         const char* pathname,  // see 'man 2 open'
         Mode mode,             // see 'man 2 open'
@@ -69,12 +74,12 @@ public:
     );
 
     /**
-	 * Constructor wrapper for ::openat() without mode parameter
-	 * @param dirfd           see 'man 2 open'
-	 * @param pathname        see 'man 2 open'
-	 * @param flags           see 'man 2 open'
-	 * @param source_location calling location, used in case of an exceotion
-	 */
+     * Constructor wrapper for ::openat() without mode parameter
+     * @param dirfd           see 'man 2 open'
+     * @param pathname        see 'man 2 open'
+     * @param flags           see 'man 2 open'
+     * @param source_location calling location, used in case of an exceotion
+     */
     explicit GuardFile(
         FileDescriptor dirfd,  // see 'man 2 open'
         const char* pathname,  // see 'man 2 open'
@@ -83,13 +88,13 @@ public:
     );
 
     /**
-	 * Constructor wrapper for ::openat() with mode parameter
-	 * @param dirfd           see 'man 2 open'
-	 * @param pathname        see 'man 2 open'
-	 * @param flags           see 'man 2 open'
-	 * @param mode            see 'man 2 open'
-	 * @param source_location calling location, used in case of an exceotion
-	 */
+     * Constructor wrapper for ::openat() with mode parameter
+     * @param dirfd           see 'man 2 open'
+     * @param pathname        see 'man 2 open'
+     * @param flags           see 'man 2 open'
+     * @param mode            see 'man 2 open'
+     * @param source_location calling location, used in case of an exceotion
+     */
     explicit GuardFile(
         FileDescriptor dirfd,  // see 'man 2 open'
         const char* pathname,  // see 'man 2 open'
@@ -97,71 +102,75 @@ public:
         Mode mode,             // see 'man 2 open'
         const std::source_location& source_location = std::source_location::current()
     );
+
+    GuardFile(GuardFile&& move)
+    : GuardFileDescriptor(std::move(move))
+    {}
 
     /// Destructor wrapper for ::close()
     virtual ~GuardFile() override;
 
     /**
-	 * Wrapper for ::ioctl without return value
-	 * @param request         // see 'man 2 ioctl'
-	 * @param ptr             // see 'man 2 ioctl'
-	 * @param source_location calling location, used in case of an exceotion
-	 */
+     * Wrapper for ::ioctl without return value
+     * @param request         see 'man 2 ioctl'
+     * @param ptr             see 'man 2 ioctl'
+     * @param source_location calling location, used in case of an exceotion
+     */
     void ioctl_noretval(
         unsigned long request,  // see 'man 2 ioctl'
         void* ptr,              // see 'man 2 ioctl'
         const std::source_location& source_location = std::source_location::current()
-    );
+    ) const;
 
     /**
-	 * Wrapper for ::ioctl with return value
-	 * @param request         // see 'man 2 ioctl'
-	 * @param ptr             // see 'man 2 ioctl'
-	 * @param source_location calling location, used in case of an exceotion
-	 */
+     * Wrapper for ::ioctl with return value
+     * @param request         see 'man 2 ioctl'
+     * @param ptr             see 'man 2 ioctl'
+     * @param source_location calling location, used in case of an exceotion
+     */
     [[nodiscard]] int ioctl_retval(
         unsigned long request,  // see 'man 2 ioctl'
         void* ptr,              // see 'man 2 ioctl'
         const std::source_location& source_location = std::source_location::current()
-    );
+    ) const;
 
     [[nodiscard]] size_t read(
         void* buf,     // see 'man 2 read'
         size_t count,  // see 'man 2 read'
         const std::source_location& source_location = std::source_location::current()
-    );
+    ) const;
 
     [[nodiscard]] std::optional<size_t> read_nonblock(
         void* buf,     // see 'man 2 read'
         size_t count,  // see 'man 2 read'
         const std::source_location& source_location = std::source_location::current()
-    );
+    ) const;
 
     [[nodiscard]] size_t write(
         void* buf,     // see 'man 2 write'
         size_t count,  // see 'man 2 write'
         const std::source_location& source_location = std::source_location::current()
-    );
+    ) const;
 
     [[nodiscard]] std::optional<size_t> write_nonblock(
         void* buf,     // see 'man 2 write'
         size_t count,  // see 'man 2 write'
         const std::source_location& source_location = std::source_location::current()
-    );
+    ) const;
 
-    void syncfs(const std::source_location& source_location = std::source_location::current());
+    void syncfs(const std::source_location& source_location = std::source_location::current()) const;
 
     [[nodiscard]] off_t lseek(
         off_t offset,  // see 'man 2 lseek'
         int whence,    // see 'man 2 lseek'
         const std::source_location& source_location = std::source_location::current()
-    );
+    ) const;
 
     [[nodiscard]] off64_t lseek64(
         off64_t offset,  // see 'man 3 lseek64'
         int whence,      // see 'man 3 lseek64'
         const std::source_location& source_location = std::source_location::current()
-    );
+    ) const;
 };
 
 }  // namespace GuardFW

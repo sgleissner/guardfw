@@ -32,7 +32,7 @@ namespace GuardFW
 
 [[nodiscard]] inline static size_t read(
     FileDescriptor fd,
-    void* buf,
+    void* buf,  // NOSONAR: allow void*
     size_t count,
     const std::source_location& source_location = std::source_location::current()
 )
@@ -42,7 +42,7 @@ namespace GuardFW
 
 [[nodiscard]] inline static std::optional<size_t> read_nonblock(
     FileDescriptor fd,
-    void* buf,
+    void* buf,  // NOSONAR: allow void*
     size_t count,
     const std::source_location& source_location = std::source_location::current()
 )
@@ -53,7 +53,7 @@ namespace GuardFW
 // used for eventfd
 [[nodiscard]] inline static bool read_nonblock_ignore_result(
     FileDescriptor fd,
-    void* buf,
+    void* buf,  // NOSONAR: allow void*
     size_t count,
     const std::source_location& source_location = std::source_location::current()
 )
@@ -65,7 +65,7 @@ namespace GuardFW
 
 [[nodiscard]] inline static size_t write(
     FileDescriptor fd,
-    void* buf,
+    void* buf,  // NOSONAR: allow void*
     size_t count,
     const std::source_location& source_location = std::source_location::current()
 )
@@ -76,7 +76,7 @@ namespace GuardFW
 // used for eventfd
 [[nodiscard]] inline static std::optional<size_t> write_nonblock(
     FileDescriptor fd,
-    void* buf,
+    void* buf,  // NOSONAR: allow void*
     size_t count,
     const std::source_location& source_location = std::source_location::current()
 )
@@ -86,7 +86,7 @@ namespace GuardFW
 
 inline void write_ignore_result(
     FileDescriptor fd,
-    void* buf,
+    void* buf,  // NOSONAR: allow void*
     size_t count,
     const std::source_location& source_location = std::source_location::current()
 )

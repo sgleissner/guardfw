@@ -28,6 +28,7 @@
 #include <optional>
 #include <type_traits>
 #include <source_location>
+#include <bit>
 
 #include <guardfw/exceptions.hpp>
 #include <guardfw/traits.hpp>
@@ -77,7 +78,7 @@ enum class ErrorSpecial : uint8_t
  * @param  rv  right-hand value to be bitwise ORed
  * @return     result of bitwise ORed enum values
  */
-constexpr inline ErrorSpecial operator|(ErrorSpecial lv, ErrorSpecial rv)
+consteval ErrorSpecial operator|(ErrorSpecial lv, ErrorSpecial rv)
 {
     using UnderlyingType = std::underlying_type_t<ErrorSpecial>;
     return static_cast<ErrorSpecial>(static_cast<UnderlyingType>(lv) | static_cast<UnderlyingType>(rv));
@@ -90,7 +91,7 @@ constexpr inline ErrorSpecial operator|(ErrorSpecial lv, ErrorSpecial rv)
  * @param  rv  right-hand value to be bitwise ANDed
  * @return     result of bitwise ANDed enum values
  */
-constexpr inline ErrorSpecial operator&(ErrorSpecial lv, ErrorSpecial rv)
+consteval ErrorSpecial operator&(ErrorSpecial lv, ErrorSpecial rv)
 {
     using UnderlyingType = std::underlying_type_t<ErrorSpecial>;
     return static_cast<ErrorSpecial>(static_cast<UnderlyingType>(lv) & static_cast<UnderlyingType>(rv));
@@ -199,21 +200,21 @@ private:
     constexpr static bool result_contains_blocking {enable_nonblocking};
 
     /**
-	 * Tests if a function result indicates an POSIX error.
-	 * @tparam FUNCTION_RESULT         Type of result, which might indicate an error.
-	 * @param  wrapped_function_result Result of previously wrapped function, which might indicate an error.
-	 * @return                         true, if result indicates an error
-	 */
+     * Tests if a function result indicates an POSIX error.
+     * @tparam FUNCTION_RESULT         Type of result, which might indicate an error.
+     * @param  wrapped_function_result Result of previously wrapped function, which might indicate an error.
+     * @return                         true, if result indicates an error
+     */
     template<ResultConcept FUNCTION_RESULT>
     [[gnu::always_inline]] static inline bool is_error(FUNCTION_RESULT wrapped_function_result);
 
     /**
-	 * Returns the POSIX error number for a failed function call.
-	 *
-	 * @tparam FUNCTION_RESULT         Type of result, which might contain an error.
-	 * @param  wrapped_function_result Result, which might contain an error.
-	 * @return                         POSIX error number
-	 */
+     * Returns the POSIX error number for a failed function call.
+     *
+     * @tparam FUNCTION_RESULT         Type of result, which might contain an error.
+     * @param  wrapped_function_result Result, which might contain an error.
+     * @return                         POSIX error number
+     */
     template<ResultConcept FUNCTION_RESULT>
     [[gnu::always_inline]] static inline Error get_error(FUNCTION_RESULT wrapped_function_result);
 
@@ -228,10 +229,10 @@ private:
 
 public:
     /**
-	 * Definition of wrapper() result type, depending on result flags and desired success result type.
-	 *
-	 * @tparam  SUCCESS_RESULT  Desired success result type.
-	 */
+     * Definition of wrapper() result type, depending on result flags and desired success result type.
+     *
+     * @tparam  SUCCESS_RESULT  Desired success result type.
+     */
     template<ResultConcept SUCCESS_RESULT>
     using WrapperResult = std::conditional_t<
         result_contains_error,
@@ -287,7 +288,7 @@ public:
         auto WRAPPED_FUNCTION,
         ResultConcept SUCCESS_RESULT = ReturnType<WRAPPED_FUNCTION>,
         ArgumentConcept... ARGS>
-    [[nodiscard, gnu::always_inline]] static inline WrapperResult<SUCCESS_RESULT> wrapper(
+    [[nodiscard, gnu::always_inline]] static WrapperResult<SUCCESS_RESULT> wrapper(
         [[maybe_unused]] const std::source_location& source_location, ARGS... args
     );
 };
@@ -312,12 +313,13 @@ template<ResultConcept FUNCTION_RESULT>
         return (wrapped_function_result == zero) && (errno != no_error);
     else if constexpr (ERROR_INDICATION == ErrorIndication::eqm1_errno)
         if constexpr (std::is_pointer_v<FUNCTION_RESULT>)
-            return (wrapped_function_result == reinterpret_cast<FUNCTION_RESULT>(-1));
+            return (wrapped_function_result == std::bit_cast<FUNCTION_RESULT>(static_cast<intptr_t>(-1)));
         else  // constexpr: FUNCTION_RESULT is integer
             return (wrapped_function_result == static_cast<FUNCTION_RESULT>(-1));
     else if constexpr (ERROR_INDICATION == ErrorIndication::eqm1_errno_changed)
         if constexpr (std::is_pointer_v<FUNCTION_RESULT>)
-            return (wrapped_function_result == reinterpret_cast<FUNCTION_RESULT>(-1)) && (errno != no_error);
+            return (wrapped_function_result == std::bit_cast<FUNCTION_RESULT>(static_cast<intptr_t>(-1)))
+                   && (errno != no_error);
         else  // constexpr: FUNCTION_RESULT is integer
             return (wrapped_function_result == static_cast<FUNCTION_RESULT>(-1)) && (errno != no_error);
     else               // constexpr, shall not be reached unless an ErrorIndication has been forgotten
@@ -357,13 +359,12 @@ Context<ERROR_INDICATION, ERROR_REPORT, ERROR_SPECIAL, SOFT_ERRORS...>::is_soft_
     }
     else if constexpr (sizeof...(SOFT_ERRORS) == 1)
     {
-        constexpr static Error soft_error {SOFT_ERRORS...};
-        return (soft_error == compare);
+        constexpr Error check_error {SOFT_ERRORS...};
+        return (check_error == compare);
     }
     else  // constexpr (sizeof...(SOFT_ERRORS) > 1)
     {
-        constexpr static Error soft_errors[] {SOFT_ERRORS...};
-        for (Error check_error : soft_errors)
+        for (Error check_error : {SOFT_ERRORS...})
             if (check_error == compare)
                 return true;
         return false;
