@@ -29,7 +29,7 @@ GuardEvent::GuardEvent(GuardEvent&& move)
 : GuardFileDescriptor(std::move(move))
 {}
 
-GuardEvent::~GuardEvent()
+GuardEvent::~GuardEvent() noexcept
 {
     close_on_destruction<GuardFW::close>();  // may throw
 }

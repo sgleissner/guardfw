@@ -32,7 +32,7 @@ public:
 
     GuardEvent(unsigned int initval, int flags);
     GuardEvent(GuardEvent&& move);
-    virtual ~GuardEvent() override;
+    virtual ~GuardEvent() noexcept override;
 
     uint64_t get_counter() const;
     void add_couter(uint64_t add_to_counter) const;
