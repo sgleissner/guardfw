@@ -107,33 +107,15 @@ template<typename RESULT>
 concept ResultConcept = std::is_pointer_v<RESULT> || std::is_integral_v<RESULT> || std::is_void_v<RESULT>;
 
 /**
- * Helper for detecting if an error is a soft error.
+ * Concept for allowed types of arguments of the wrapped function.
  *
- * @tparam SOFT_ERRORS List of soft errors (might be empty).
- * @param  compare     Error code to be compared with all elements in soft errors list.
- * @return             true, if error is a soft error.
+ * Valid for pointers and integers.
+ *
+ * @tparam ARGUMENT
  */
-template<Error... SOFT_ERRORS>
-[[gnu::always_inline]] static inline bool is_soft_error(Error compare)
-{
-    if constexpr (sizeof...(SOFT_ERRORS) == 0)
-    {
-        return false;
-    }
-    else if constexpr (sizeof...(SOFT_ERRORS) == 1)
-    {
-        constexpr static Error soft_error {SOFT_ERRORS...};
-        return (soft_error == compare);
-    }
-    else  // constexpr (sizeof...(SOFT_ERRORS) > 1)
-    {
-        constexpr static Error soft_errors[] {SOFT_ERRORS...};
-        for (Error check_error : soft_errors)
-            if (check_error == compare)
-                return true;
-        return false;
-    }
-}
+template<typename ARGUMENT>
+concept ArgumentConcept = std::is_integral_v<ARGUMENT> || std::is_pointer_v<ARGUMENT>;
+
 
 /**
  * Describes the POSIX calling context for POSIX and Linux API functions for correct error management.
@@ -208,6 +190,10 @@ private:
 
     /// Flag indicates, that the result may contain a non-throwing error.
     constexpr static bool result_contains_error {enable_direct_errors || (enable_soft_errors && !ignore_soft_errors)};
+    static_assert(
+        !result_contains_error || errors_detectable,
+        "errors can not be returned, because errors can not be not detected."
+    );
 
     /// Flag, indicates that the result may indicate a blocking prevention.
     constexpr static bool result_contains_blocking {enable_nonblocking};
@@ -230,6 +216,15 @@ private:
 	 */
     template<ResultConcept FUNCTION_RESULT>
     [[gnu::always_inline]] static inline Error get_error(FUNCTION_RESULT wrapped_function_result);
+
+
+    /**
+     * Helper for detecting if an error is a soft error.
+     *
+     * @param  compare     Error code to be compared with all elements in soft errors list.
+     * @return             true, if error is a soft error.
+     */
+    [[gnu::always_inline]] static inline bool is_soft_error(Error compare);
 
 public:
     /**
@@ -262,20 +257,36 @@ public:
                 void>>>;                                              // NO ERROR, NO VALUE, NO BLOCKING (checked)
 
     /**
-	 * Wrapper for POSIX and other Linux API calls.
-	 *
-	 * Throws errors as exceptions, but allow non-throwing errors also as handling of EINTR-repetitions
-	 * and EAGAIN/EWOULDBLOCK non-blocking detection.
-	 *
-	 * @tparam WRAPPED_FUNCTION Function pointer of POSIX or Linux API call.
-	 * @tparam SUCCESS_RESULT   Cleaned return type of wrapper in case of success, standard is API call return type.
-	 * @tparam ARGS             Types of arguments for wrapped call.
-	 * @param  source_location  Eventually forwarded source code position of call.
-	 * @param  args             Arguments for wrapped call.
-	 * @return                  Contains success (SUCCESS_RESULT) and eventually (soft) errors (std::(un)expected)
-	 *                          or blocking information (std::optional).
-	 */
-    template<auto WRAPPED_FUNCTION, ResultConcept SUCCESS_RESULT = ReturnType<WRAPPED_FUNCTION>, typename... ARGS>
+     * Wrapper for POSIX and other Linux API calls.
+     *
+     * Throws errors as exceptions, but allow non-throwing errors also as handling of EINTR-repetitions
+     * and EAGAIN/EWOULDBLOCK non-blocking detection.
+     *
+     * Result processing priority:
+     * - return successful values
+     * - repeat in case of EINTR
+     * - report blockings in case of EAGAIN/EWOULDBLOCK
+     * - return successful in case of ignored errors
+     * - throw non-soft/non-direct errors
+     * - return soft/direct errors
+     *
+     * @tparam ERROR_INDICATION Defines how a wrapped posix function indicates an error.
+     * @tparam ERROR_REPORT     Defines if and how an error shall be reported.
+     * @tparam ERROR_SPECIAL    Flags to detect necessary repeats, prevented blockings or ignore errors.
+     * @tparam SOFT_ERRORS      List of soft errors, which shall either be reported in the return value or be ignored.
+     * @tparam WRAPPED_FUNCTION Function pointer of POSIX or Linux API call, which shall be encapsulated/wrapped.
+     * @tparam SUCCESS_RESULT   Type to which the success result shall be casted to, standard is API call return type.
+     * @tparam ARGS             Argument types of WRAPPED_FUNCTION arguments, automatically deducted.
+     * @param source_location   Holds information about caller/calling position.
+     * @param args              Arguments for WRAPPED_FUNCTION (only pointers or integers allowed).
+     * @return                  Returns success value (SUCCESS_RESULT) and eventually (soft) errors (std::(un)expected)
+     *                          or blocking information (std::optional) (type depends on template parameters above).
+     */
+
+    template<
+        auto WRAPPED_FUNCTION,
+        ResultConcept SUCCESS_RESULT = ReturnType<WRAPPED_FUNCTION>,
+        ArgumentConcept... ARGS>
     [[nodiscard, gnu::always_inline]] static inline WrapperResult<SUCCESS_RESULT> wrapper(
         [[maybe_unused]] const std::source_location& source_location, ARGS... args
     );
@@ -289,7 +300,7 @@ template<ResultConcept FUNCTION_RESULT>
     FUNCTION_RESULT wrapped_function_result
 )
 {
-    constexpr FUNCTION_RESULT zero {};  // is integer or pointer
+    constexpr FUNCTION_RESULT zero {};  // is integer (0) or pointer (nullptr)
 
     if constexpr (ERROR_INDICATION == ErrorIndication::eq0_errno)
         return (wrapped_function_result == zero);
@@ -302,12 +313,12 @@ template<ResultConcept FUNCTION_RESULT>
     else if constexpr (ERROR_INDICATION == ErrorIndication::eqm1_errno)
         if constexpr (std::is_pointer_v<FUNCTION_RESULT>)
             return (wrapped_function_result == reinterpret_cast<FUNCTION_RESULT>(-1));
-        else
+        else  // constexpr: FUNCTION_RESULT is integer
             return (wrapped_function_result == static_cast<FUNCTION_RESULT>(-1));
     else if constexpr (ERROR_INDICATION == ErrorIndication::eqm1_errno_changed)
         if constexpr (std::is_pointer_v<FUNCTION_RESULT>)
             return (wrapped_function_result == reinterpret_cast<FUNCTION_RESULT>(-1)) && (errno != no_error);
-        else
+        else  // constexpr: FUNCTION_RESULT is integer
             return (wrapped_function_result == static_cast<FUNCTION_RESULT>(-1)) && (errno != no_error);
     else               // constexpr, shall not be reached unless an ErrorIndication has been forgotten
         return false;  // in this case, we report always an error
@@ -335,10 +346,33 @@ template<ResultConcept FUNCTION_RESULT>
         return errno;
 }
 
+// the description is in the struct above
+template<ErrorIndication ERROR_INDICATION, ErrorReport ERROR_REPORT, ErrorSpecial ERROR_SPECIAL, Error... SOFT_ERRORS>
+[[gnu::always_inline]] inline bool
+Context<ERROR_INDICATION, ERROR_REPORT, ERROR_SPECIAL, SOFT_ERRORS...>::is_soft_error(Error compare)
+{
+    if constexpr (sizeof...(SOFT_ERRORS) == 0)
+    {
+        return false;
+    }
+    else if constexpr (sizeof...(SOFT_ERRORS) == 1)
+    {
+        constexpr static Error soft_error {SOFT_ERRORS...};
+        return (soft_error == compare);
+    }
+    else  // constexpr (sizeof...(SOFT_ERRORS) > 1)
+    {
+        constexpr static Error soft_errors[] {SOFT_ERRORS...};
+        for (Error check_error : soft_errors)
+            if (check_error == compare)
+                return true;
+        return false;
+    }
+}
 
 // the description is in the struct above
 template<ErrorIndication ERROR_INDICATION, ErrorReport ERROR_REPORT, ErrorSpecial ERROR_SPECIAL, Error... SOFT_ERRORS>
-template<auto WRAPPED_FUNCTION, ResultConcept SUCCESS_RESULT, typename... ARGS>
+template<auto WRAPPED_FUNCTION, ResultConcept SUCCESS_RESULT, ArgumentConcept... ARGS>
 [[nodiscard, gnu::always_inline]] inline  // forced break for clang-format
     Context<ERROR_INDICATION, ERROR_REPORT, ERROR_SPECIAL, SOFT_ERRORS...>::WrapperResult<SUCCESS_RESULT>
     Context<ERROR_INDICATION, ERROR_REPORT, ERROR_SPECIAL, SOFT_ERRORS...>::wrapper(
@@ -378,130 +412,122 @@ template<auto WRAPPED_FUNCTION, ResultConcept SUCCESS_RESULT, typename... ARGS>
         "when wrapped function returns void, wrapper must also return void"
     );
 
+    // This rule is necessary, as we must not return a fake success value in case of ignored errors
     static_assert(
         std::is_void_v<SUCCESS_RESULT> || !ignore_soft_errors,
         "Soft errors can only be ignored, if wrapper returns void in success case"
     );
 
-    if constexpr (wrapped_function_returns_void)
+    if constexpr (wrapped_function_returns_void)  // wrapped function returns void, there is no return value to handle
     {
         WRAPPED_FUNCTION(args...);
+        return;
     }
-    else  // constexpr
+    else if constexpr (!errors_detectable)  // wrapped function is always successful
     {
-        [[maybe_unused]] Error error;  // will be used only if errors_detectable==true
+        [[maybe_unused]] WrappedFunctionResult wrapped_function_result = WRAPPED_FUNCTION(args...);
+        if constexpr (result_contains_value<SUCCESS_RESULT>)
+            return static_cast<SUCCESS_RESULT>(wrapped_function_result);
+        else         // constexpr
+            return;  // ignore result
+    }
+    else  // constexpr errors_detectable
+    {
+    repeat_eintr:  // do-while-loops can not be disabled by constexpr
+        // some POSIX functions have an ambiguous error indication in their return value
+        if constexpr ((ERROR_INDICATION == ErrorIndication::eq0_errno_changed) || (ERROR_INDICATION == ErrorIndication::eqm1_errno_changed))
+            errno = no_error;  // reset errno to a default no error value
 
-        do
+        WrappedFunctionResult wrapped_function_result = WRAPPED_FUNCTION(args...);
+
+        bool error_flag = is_error(wrapped_function_result);  // test error condition
+
+        if (!error_flag) [[likely]]  // handle success
         {
-            // some POSIX functions are ambiguous in their error indication in the return value
-            if constexpr ((ERROR_INDICATION == ErrorIndication::eq0_errno_changed) || (ERROR_INDICATION == ErrorIndication::eqm1_errno_changed))
-                errno = no_error;
+            if constexpr (result_contains_value<SUCCESS_RESULT>)
+                return static_cast<SUCCESS_RESULT>(wrapped_function_result);
+            else if constexpr (result_contains_blocking)
+                return true;
+            else if constexpr (result_contains_error)
+                return no_error;
+            else  // constexpr
+                return;
+        }  // won't leave scope, but will return
 
-            [[maybe_unused]] WrappedFunctionResult wrapped_function_result = WRAPPED_FUNCTION(args...);
+        Error error = get_error(wrapped_function_result);  // identify error
 
-            // test error condition
-            [[maybe_unused]] bool error_flag;  // will be used only if errors_detectable==true
-            if constexpr (errors_detectable)
-                error_flag = is_error(wrapped_function_result);
+        if constexpr (enable_repeat)  // do-while-loops can not be disabled by constexpr
+            if (error == EINTR)       // test for interrupts by signal handlers
+                goto repeat_eintr;    // error EINTR will repeat the wrapped call
 
-            // handle success
-            if (!errors_detectable || !error_flag) [[likely]]
+        if constexpr (result_contains_blocking)  // handle prevented blockings
+        {
+            if (error == EAGAIN)  // or EWOULDBLOCK, see static_assert above, NOT constexpr
             {
                 if constexpr (result_contains_value<SUCCESS_RESULT>)
-                    return static_cast<SUCCESS_RESULT>(wrapped_function_result);
-                else if constexpr (result_contains_blocking)
-                    return true;
-                else if constexpr (result_contains_error)
-                    return no_error;
-                else  // constexpr
-                    return;
-            }  // won't leave scope, but will return
+                    return std::nullopt;  // returns std::optional<> or std::expected<std::optional<>>
+                else                      // constexpr
+                    return false;         // returns bool or std::expected<bool>
+            }                             // won't leave scope, but will return
+        }                                 // may leave scope and continue
 
-            // error case
-            if constexpr (errors_detectable)
-                error = get_error(wrapped_function_result);
-        }  // may_repeat is constexpr, so this loop will be optimized away if may_repeat==false
-        while (enable_repeat && (error == EINTR));
-
-        if constexpr (errors_detectable)
+        if constexpr (enable_soft_errors)  // detect soft errors, handle ignored soft errors and error exceptions
         {
-            // handle blockings
-            if constexpr (result_contains_blocking)
+            if (is_soft_error(error))  // NOT constexpr
             {
-                if (error == EAGAIN)  // NOT constexpr
-                {
-                    if constexpr (result_contains_value<SUCCESS_RESULT>)
-                        return std::nullopt;  // returns std::optional<> or std::expected<std::optional<>>
-                    else                      // constexpr
-                        return false;         // returns bool or std::expected<bool>
-                }
-            }  // may leave scope and continue
-
-            // handle instant error exceptions
-            if constexpr (enable_exception_errors && !enable_soft_errors)
-                throw WrapperError(error, name_of<WRAPPED_FUNCTION>(), source_location);
-            else  // constexpr
+                if constexpr (ignore_soft_errors)  // handle ignored soft errors
+                {  // result contains no success value, guaranteed by static_assert above
+                    if constexpr (result_contains_blocking)
+                        return true;
+                    else if constexpr (result_contains_error)
+                        return no_error;
+                    else  // constexpr
+                        return;
+                }  // won't leave scope
+            }      // will leave scope, if soft errors are not ignored
+            else   // NOT constexpr
             {
-                // handle error exceptions, detect soft errors
-                if constexpr (enable_soft_errors)
-                {
-                    if (is_soft_error<SOFT_ERRORS...>(error))
-                    {
-                        if constexpr (ignore_soft_errors)
-                        {  // result contains no value, guaranteed by static_assert above
-                            if constexpr (result_contains_blocking)
-                                return true;
-                            else if constexpr (result_contains_error)
-                                return no_error;
-                            else  // constexpr
-                                return;
-                        }  // won't leave scope
-                    }      // may leave scope
-                    else
-                    {
-                        if constexpr (enable_exception_errors)
-                            throw WrapperError(error, name_of<WRAPPED_FUNCTION>(), source_location);
-                    }  // may leave scope
-                }      // mey leave scope and continue
+                if constexpr (enable_exception_errors)
+                    throw WrapperError(error, name_of<WRAPPED_FUNCTION>(), source_location);
+            }                                        // may leave scope for direct errors
+        }                                            // mey leave scope for soft or direct errors
+        else if constexpr (enable_exception_errors)  // handle instant error exceptions
+            throw WrapperError(error, name_of<WRAPPED_FUNCTION>(), source_location);
 
-                // handle error returns
-                if constexpr (result_contains_error)
-                {
-                    if constexpr (result_contains_value<SUCCESS_RESULT> || result_contains_blocking)
-                        return std::unexpected<Error>(error);  // returns std::expected<>
-                    else                                       // constexpr
-                        return error;                          // returns Error
-                }                                              // won't leave scope, but will return
-            }
-        }
+        if constexpr (result_contains_error)  // handle soft or direct errors
+        {
+            if constexpr (result_contains_value<SUCCESS_RESULT> || result_contains_blocking)
+                return std::unexpected<Error>(error);  // returns std::expected<>
+            else                                       // constexpr
+                return error;                          // returns Error
+        }                                              // won't leave scope
     }  // we rely on the compiler that all return paths are checked due to constexpr if.
 }  // may reach end of wrapper if constexpr (result_is_void) for void return
 
 
-/// Pre-defined ContextPosix<> used for most POSIX functions as standard context
+/// Pre-defined Context<> used for most POSIX functions as standard context
 using ContextStd = Context<ErrorIndication::eqm1_errno>;
 
-/// Pre-defined ContextPosix<> used for close(), ignore EINTR, but throw all other errors
+/// Pre-defined Context<> used for close(), ignore EINTR, but throws all other errors
 using ContextIgnoreEintr
     = Context<ErrorIndication::eqm1_errno, ErrorReport::exception, ErrorSpecial::ignore_softerrors, EINTR>;
 
-/// Pre-defined ContextPosix<> used for functions, which may return EINTR after signals
+/// Pre-defined Context<> used for functions, which may return EINTR after signals
 using ContextRepeatEINTR = Context<ErrorIndication::eqm1_errno, ErrorReport::exception, ErrorSpecial::eintr_repeats>;
 
-/// Pre-defined ContextPosix<> used for functions, which may return EINTR or EWOULDBLOCK/EAGAIN
+/// Pre-defined Context<> used for functions, which may return EINTR or EWOULDBLOCK/EAGAIN
 using ContextNonblockRepeatEINTR = Context<
     ErrorIndication::eqm1_errno,
     ErrorReport::exception,
     ErrorSpecial::eintr_repeats | ErrorSpecial::nonblock>;
 
-/// Pre-defined ContextPosix<> used for getpriority(), like ContextStd, but with special errno handling
+/// Pre-defined Context<> used for getpriority(), like ContextStd, but with special errno handling
 using ContextMinus1ErrnoChanged = Context<ErrorIndication::eqm1_errno_changed>;
 
-// currently not used
-/// Pre-defined ContextPosix<> without exceptions, but direct returned errors
+/// Pre-defined Context<> without exceptions, but direct returned errors
 using ContextDirectErrors = Context<ErrorIndication::eqm1_errno, ErrorReport::direct>;
 
-/// Pre-defined ContextPosix<> used for close() without any error handling (forces ignoring error indication)
+/// Pre-defined Context<> used for close() without any error handling (forces ignoring error indication)
 using ContextIgnoreErrors = Context<ErrorIndication::none, ErrorReport::none>;
 
 }  //  namespace GuardFW
