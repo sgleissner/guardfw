@@ -30,11 +30,11 @@ namespace GuardFW
 extern constinit unsigned long constant_TFD_IOC_SET_TICKS;
 
 GuardTimer::GuardTimer(int clockid, int flags)
-: Guard(GuardFW::timerfd_create(clockid, flags))
+: GuardFileDescriptor(GuardFW::timerfd_create(clockid, flags))
 {}
 
 GuardTimer::GuardTimer(GuardTimer&& move)
-: Guard(std::move(move))
+: GuardFileDescriptor(std::move(move))
 {}
 
 GuardTimer::~GuardTimer()

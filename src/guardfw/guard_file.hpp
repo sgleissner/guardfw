@@ -24,7 +24,7 @@
 namespace GuardFW
 {
 
-class GuardFile : Guard<FileDescriptor, file_descriptor_invalid>
+class GuardFile : GuardFileDescriptor
 {
 public:
     using Flags = TypeGuard<int>;
