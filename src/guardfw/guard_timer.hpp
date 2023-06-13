@@ -16,9 +16,6 @@
 
 #include <cstdint>
 
-#include <sys/timerfd.h>
-#include <linux/timerfd.h>
-
 #include <guardfw/guard.hpp>
 #include <guardfw/file_descriptor.hpp>
 

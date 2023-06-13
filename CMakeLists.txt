@@ -86,6 +86,7 @@ set(library_sources
         src/guard_message.cpp
         src/guard_signal.cpp
         src/guard_timer.cpp
+        src/guard_timer_constant.cpp
         )
 
 set(test_sources
