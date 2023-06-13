@@ -24,7 +24,7 @@ namespace GuardFW
 [[gnu::always_inline]] inline static void ioctl_noretval(
     FileDescriptor fd,
     unsigned long request,
-    void* ptr,
+    void* ptr,  // NOSONAR: allow void*
     const std::source_location& source_location = std::source_location::current()
 )
 {
@@ -34,7 +34,7 @@ namespace GuardFW
 [[gnu::always_inline, nodiscard]] inline static int ioctl_retval(
     FileDescriptor fd,
     unsigned long request,
-    void* ptr,
+    void* ptr,  // NOSONAR: allow void*
     const std::source_location& source_location = std::source_location::current()
 )
 {

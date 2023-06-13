@@ -70,61 +70,61 @@ GuardFile::~GuardFile()  // Destructor wrapper for ::close()
 
 void GuardFile::ioctl_noretval(  // wrapper for ::ioctl() without return value
     unsigned long request,
-    void* ptr,
+    void* ptr,  // NOSONAR: allow void*
     const std::source_location& source_location
-)
+) const
 {
     GuardFW::ioctl_noretval(handle, request, ptr, source_location);
 }
 
 [[nodiscard]] int GuardFile::ioctl_retval(  // wrapper for ::ioctl() with return value
     unsigned long request,
-    void* ptr,
+    void* ptr,  // NOSONAR: allow void*
     const std::source_location& source_location
-)
+) const
 {
     return GuardFW::ioctl_retval(handle, request, ptr, source_location);
 }
 
 [[nodiscard]] size_t GuardFile::read(  // wrapper for ::read() without blocking prevention
-    void* buf,
+    void* buf,                         // NOSONAR: allow void*
     size_t count,
     const std::source_location& source_location
-)
+) const
 {
     return GuardFW::read(handle, buf, count, source_location);
 }
 
 [[nodiscard]] std::optional<size_t> GuardFile::read_nonblock(  // wrapper for ::read() with blocking prevention
-    void* buf,
+    void* buf,                                                 // NOSONAR: allow void*
     size_t count,
     const std::source_location& source_location
-)
+) const
 {
     return GuardFW::read_nonblock(handle, buf, count, source_location);
 }
 
 [[nodiscard]] size_t GuardFile::write(  // wrapper for ::write() without blocking prevention
-    void* buf,
+    void* buf,                          // NOSONAR: allow void*
     size_t count,
     const std::source_location& source_location
-)
+) const
 {
     return GuardFW::write(handle, buf, count, source_location);
 }
 
 [[nodiscard]] std::optional<size_t> GuardFile::write_nonblock(  // wrapper for ::write() with blocking prevention
-    void* buf,
+    void* buf,                                                  // NOSONAR: allow void*
     size_t count,
     const std::source_location& source_location
-)
+) const
 {
     return GuardFW::write_nonblock(handle, buf, count, source_location);
 }
 
 void GuardFile::syncfs(  // wrapper for ::syncfs()
     const std::source_location& source_location
-)
+) const
 {
     GuardFW::syncfs(handle, source_location);
 }
@@ -133,7 +133,7 @@ void GuardFile::syncfs(  // wrapper for ::syncfs()
     off_t offset,
     int whence,
     const std::source_location& source_location
-)
+) const
 {
     return GuardFW::lseek(handle, offset, whence, source_location);
 }
@@ -142,7 +142,7 @@ void GuardFile::syncfs(  // wrapper for ::syncfs()
     off64_t offset,
     int whence,
     const std::source_location& source_location
-)
+) const
 {
     return GuardFW::lseek64(handle, offset, whence, source_location);
 }

@@ -22,20 +22,19 @@
 namespace GuardFW
 {
 
-class GuardTimer : GuardFileDescriptor
+class GuardTimer : public GuardFileDescriptor
 {
 public:
     using TimeFraction = uint64_t;
 
-public:
     GuardTimer() = delete;
     GuardTimer(const GuardTimer&) = delete;
     GuardTimer& operator=(const GuardTimer&) = delete;
     GuardTimer& operator=(GuardTimer&&) = delete;
 
     GuardTimer(int clockid, int flags);
-    GuardTimer(GuardTimer&& move);
-    virtual ~GuardTimer() override;
+    GuardTimer(GuardTimer&& move) noexcept;
+    virtual ~GuardTimer() noexcept override;
 
     uint64_t get_expirations() const;
     void set_expirations(uint64_t expirations) const;
