@@ -12,7 +12,7 @@
 
 
 #include <guardfw/guard_file.hpp>
-#include <guardfw/wrapped_fnctl.hpp>
+#include <guardfw/wrapped_fcntl.hpp>
 #include <guardfw/wrapped_ioctl.hpp>
 #include <guardfw/wrapped_unistd.hpp>
 

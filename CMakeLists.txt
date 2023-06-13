@@ -67,7 +67,7 @@ set(public_headers
         src/guardfw/traits.hpp
         src/guardfw/version.hpp
         src/guardfw/wrapped_eventfd.hpp
-        src/guardfw/wrapped_fnctl.hpp
+        src/guardfw/wrapped_fcntl.hpp
         src/guardfw/wrapped_ioctl.hpp
         src/guardfw/wrapped_mqueue.hpp
         src/guardfw/wrapped_resource.hpp
