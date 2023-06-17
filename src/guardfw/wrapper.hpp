@@ -45,7 +45,8 @@ constexpr static Error no_error = 0;  ///< POSIX does not define a success error
 /// Describes how to test result value from wrapped function for error indication.
 enum class ErrorIndication : uint8_t
 {
-    none,                ///< wrapped function is guaranteed always successful or forced to ignore errors (be careful)
+    none,                ///< wrapped function is guaranteed to be always successful
+    ignore,              ///< wrapped function is forced to ignore errors (be careful, no success return value allowed)
     lt0_direct,          ///< error if return value < 0, negative value is error code: e.g. for io_uring_enter()
     bt0_direct,          ///< error if return value > 0, positive value is error code: e.g. for pthread_cancel()
     eq0_errno,           ///< error if return value == 0, e.g. for fopen()
@@ -135,7 +136,8 @@ struct Context
 {
 private:
     /// Flag indicates, that errors can be detected
-    constexpr static bool errors_detectable {(ERROR_INDICATION != ErrorIndication::none)};
+    constexpr static bool errors_detectable {
+        ((ERROR_INDICATION != ErrorIndication::none) && (ERROR_INDICATION != ErrorIndication::ignore))};
 
     /// Flag indicates, that the wrapped function might return all errors directly.
     constexpr static bool enable_direct_errors {(ERROR_REPORT == ErrorReport::direct)};
@@ -394,15 +396,17 @@ template<auto WRAPPED_FUNCTION, ResultConcept SUCCESS_RESULT, ArgumentConcept...
         "incompatible override return type."
     );
     static_assert(
-        std::is_void_v<SUCCESS_RESULT> || (ERROR_REPORT != ErrorReport::none),
+        std::is_void_v<SUCCESS_RESULT> || (ERROR_REPORT != ErrorReport::none)
+            || (ERROR_INDICATION != ErrorIndication::ignore),
         "Ignoring errors when wrapper function may return a success value is not allowed."
     );
 
     constexpr bool wrapped_function_returns_void = std::is_void_v<WrappedFunctionResult>;
     static_assert(
         !wrapped_function_returns_void
-            || ((ERROR_INDICATION == ErrorIndication::none) && (ERROR_REPORT == ErrorReport::none)
-                && (ERROR_SPECIAL == ErrorSpecial::none) && (sizeof...(SOFT_ERRORS) == 0)),
+            || (((ERROR_INDICATION == ErrorIndication::none) || (ERROR_INDICATION == ErrorIndication::ignore))
+                && (ERROR_REPORT == ErrorReport::none) && (ERROR_SPECIAL == ErrorSpecial::none)
+                && (sizeof...(SOFT_ERRORS) == 0)),
         "wrapped void functions can not have any error handling"
     );
 
@@ -477,7 +481,7 @@ template<auto WRAPPED_FUNCTION, ResultConcept SUCCESS_RESULT, ArgumentConcept...
             if (is_soft_error(error))  // NOT constexpr
             {
                 if constexpr (ignore_soft_errors)  // handle ignored soft errors
-                {  // result contains no success value, guaranteed by static_assert above
+                {  // result contains no success value brcause of ignore_soft_errors, guaranteed by static_assert above
                     if constexpr (result_contains_blocking)
                         return true;
                     else if constexpr (result_contains_error)
@@ -528,8 +532,12 @@ using ContextMinus1ErrnoChanged = Context<ErrorIndication::eqm1_errno_changed>;
 /// Pre-defined Context<> without exceptions, but direct returned errors
 using ContextDirectErrors = Context<ErrorIndication::eqm1_errno, ErrorReport::direct>;
 
-/// Pre-defined Context<> used for close() without any error handling (forces ignoring error indication)
-using ContextIgnoreErrors = Context<ErrorIndication::none, ErrorReport::none>;
+/// Pre-defined Context<> without any error handling (forces ignoring error indication)
+using ContextIgnoreErrors = Context<ErrorIndication::ignore, ErrorReport::none>;
+
+/// Pre-defined Context<> without any error handling for Posix functions, which are always successful
+using ContextNoErrors = Context<ErrorIndication::none, ErrorReport::none>;
+
 
 }  //  namespace GuardFW
 
