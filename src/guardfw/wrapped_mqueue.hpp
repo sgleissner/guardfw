@@ -15,7 +15,10 @@
 
 #include <mqueue.h>
 
+#include <guardfw/file_descriptor.hpp>
 #include <guardfw/wrapper.hpp>
+
+static_assert(std::is_same_v<mqd_t, GuardFW::FileDescriptor>, "mqd_t and FileDescriptor are not the same type");
 
 namespace GuardFW
 {
@@ -79,7 +82,7 @@ inline static void mq_send(
     return ContextNonblockRepeatEINTR::wrapper<::mq_send, void>(source_location, mqdes, msg_ptr, msg_len, msg_prio);
 }
 
-inline static void mq_timedsend(
+inline static bool mq_timedsend(  // call to mq_timedsend only allowed when O_NONBLOCK is not set
     mqd_t mqdes,
     const char* msg_ptr,
     size_t msg_len,
@@ -88,21 +91,10 @@ inline static void mq_timedsend(
     const std::source_location& source_location = std::source_location::current()
 )
 {
-    ContextRepeatEINTR::wrapper<::mq_timedsend, void>(source_location, mqdes, msg_ptr, msg_len, msg_prio, abs_timeout);
-}
-
-[[nodiscard]] inline static bool mq_timedsend_nonblock(
-    mqd_t mqdes,
-    const char* msg_ptr,
-    size_t msg_len,
-    unsigned int msg_prio,
-    const struct timespec* abs_timeout,
-    const std::source_location& source_location = std::source_location::current()
-)
-{
-    return ContextNonblockRepeatEINTR::wrapper<::mq_timedsend, void>(
+    Error timedsend_error = ContextRepeatEINTRSoftTimeout::wrapper<::mq_timedsend, void>(
         source_location, mqdes, msg_ptr, msg_len, msg_prio, abs_timeout
     );
+    return (timedsend_error == GuardFW::no_error);
 }
 
 [[nodiscard]] inline static size_t mq_receive(
@@ -129,7 +121,8 @@ inline static void mq_timedsend(
     );
 }
 
-[[nodiscard]] inline static size_t mq_timedreceive(
+[[nodiscard]] inline static std::optional<size_t>
+mq_timedreceive(  // call to mq_timedsend only allowed when O_NONBLOCK is not set
     mqd_t mqdes,
     char* __restrict__ msg_ptr,
     size_t msg_len,
@@ -138,23 +131,14 @@ inline static void mq_timedsend(
     const std::source_location& source_location = std::source_location::current()
 )
 {
-    return ContextRepeatEINTR::wrapper<::mq_timedreceive, size_t>(
-        source_location, mqdes, msg_ptr, msg_len, msg_prio, abs_timeout
-    );
-}
-
-[[nodiscard]] inline static std::optional<size_t> mq_timedreceive_nonblock(
-    mqd_t mqdes,
-    char* __restrict__ msg_ptr,
-    size_t msg_len,
-    unsigned int* __restrict__ msg_prio,
-    const struct timespec* __restrict__ abs_timeout,
-    const std::source_location& source_location = std::source_location::current()
-)
-{
-    return ContextNonblockRepeatEINTR::wrapper<::mq_timedreceive, size_t>(
-        source_location, mqdes, msg_ptr, msg_len, msg_prio, abs_timeout
-    );
+    std::expected<size_t, Error> timedreceive_result
+        = ContextRepeatEINTRSoftTimeout::wrapper<::mq_timedreceive, size_t>(
+            source_location, mqdes, msg_ptr, msg_len, msg_prio, abs_timeout
+        );
+    if (timedreceive_result.has_value())
+        return timedreceive_result.value();
+    else
+        return std::nullopt;  // Timeout
 }
 
 inline static void mq_notify(
