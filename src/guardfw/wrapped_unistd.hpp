@@ -51,6 +51,17 @@ namespace GuardFW
 }
 
 // used for eventfd
+inline static void read_ignore_result(
+    FileDescriptor fd,
+    void* buf,  // NOSONAR: allow void*
+    size_t count,
+    const std::source_location& source_location = std::source_location::current()
+)
+{
+    ContextRepeatEINTR::wrapper<::read, void>(source_location, fd, buf, count);
+}
+
+// used for eventfd
 [[nodiscard]] inline static bool read_nonblock_ignore_result(
     FileDescriptor fd,
     void* buf,  // NOSONAR: allow void*
@@ -73,7 +84,6 @@ namespace GuardFW
     return ContextRepeatEINTR::wrapper<::write, size_t>(source_location, fd, buf, count);
 }
 
-// used for eventfd
 [[nodiscard]] inline static std::optional<size_t> write_nonblock(
     FileDescriptor fd,
     void* buf,  // NOSONAR: allow void*
@@ -84,6 +94,7 @@ namespace GuardFW
     return ContextNonblockRepeatEINTR::wrapper<::write, size_t>(source_location, fd, buf, count);
 }
 
+// used for eventfd
 inline void write_ignore_result(
     FileDescriptor fd,
     void* buf,  // NOSONAR: allow void*
@@ -91,7 +102,18 @@ inline void write_ignore_result(
     const std::source_location& source_location = std::source_location::current()
 )
 {
-    return ContextRepeatEINTR::wrapper<::write, void>(source_location, fd, buf, count);
+    ContextRepeatEINTR::wrapper<::write, void>(source_location, fd, buf, count);
+}
+
+// used for eventfd
+[[nodiscard]] inline bool write_nonblock_ignore_result(
+    FileDescriptor fd,
+    void* buf,  // NOSONAR: allow void*
+    size_t count,
+    const std::source_location& source_location = std::source_location::current()
+)
+{
+    return ContextNonblockRepeatEINTR::wrapper<::write, void>(source_location, fd, buf, count);
 }
 
 // close
