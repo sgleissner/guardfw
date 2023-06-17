@@ -102,6 +102,11 @@ protected:
         const std::source_location& source_location = std::source_location::current()
     )
     {
+        static_assert(
+            std::is_invocable_r_v<void, decltype(CLOSE), Handle, decltype(source_location)>,
+            "CLOSE template function ist not invocable."
+        );
+
         if (handle != invalid_handle)
         {
             CLOSE(handle, source_location);
@@ -157,6 +162,8 @@ protected:
         else  // constexpr std::is_void_v<RESULT>
             fcntl_noretval(fd, cmd, arg);
     }
+
+    void close_on_destruction(const std::source_location& source_location = std::source_location::current());
 };
 
 /**

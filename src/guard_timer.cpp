@@ -39,7 +39,7 @@ GuardTimer::GuardTimer(GuardTimer&& move) noexcept
 
 GuardTimer::~GuardTimer() noexcept
 {
-    close_on_destruction<GuardFW::close>();  // may throw
+    close_on_destruction();  // may throw
 }
 
 uint64_t GuardTimer::get_expirations() const

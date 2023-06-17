@@ -22,7 +22,7 @@
 namespace GuardFW
 {
 
-class GuardEvent : GuardFileDescriptor
+class GuardEvent : public GuardFileDescriptor
 {
 public:
     GuardEvent() = delete;
@@ -30,12 +30,17 @@ public:
     GuardEvent& operator=(const GuardEvent&) = delete;
     GuardEvent& operator=(GuardEvent&&) = delete;
 
-    GuardEvent(unsigned int initval, int flags);
-    GuardEvent(GuardEvent&& move);
+    GuardEvent(
+        unsigned int initval, int flags, const std::source_location& source_location = std::source_location::current()
+    );
+
+    GuardEvent(GuardEvent&& move) noexcept;
     virtual ~GuardEvent() noexcept override;
 
-    uint64_t get_counter() const;
-    void add_couter(uint64_t add_to_counter) const;
+    uint64_t get_counter_blocking() const;
+    uint64_t get_counter_nonblocking() const;
+    void add_couter_blocking(uint64_t add_to_counter) const;
+    bool add_couter_nonblocking(uint64_t add_to_counter) const;
 };
 
 }  // namespace GuardFW

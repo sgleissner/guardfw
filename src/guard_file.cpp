@@ -65,7 +65,7 @@ GuardFile::GuardFile(  // Constructor wrapper for ::openat() with mode parameter
 
 GuardFile::~GuardFile()  // Destructor wrapper for ::close()
 {
-    close_on_destruction<GuardFW::close>();  // may throw
+    close_on_destruction();  // may throw
 }
 
 void GuardFile::ioctl_noretval(  // wrapper for ::ioctl() without return value

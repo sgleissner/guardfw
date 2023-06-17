@@ -11,7 +11,6 @@
  */
 
 #include <cstdint>
-#include <optional>
 #include <utility>
 
 #include <guardfw/guard_event.hpp>
@@ -21,32 +20,49 @@
 namespace GuardFW
 {
 
-GuardEvent::GuardEvent(unsigned int initval, int flags)
-: GuardFileDescriptor(GuardFW::eventfd(initval, flags))
+GuardEvent::GuardEvent(unsigned int initval, int flags, const std::source_location& source_location)
+: GuardFileDescriptor(GuardFW::eventfd(initval, flags, source_location))
 {}
 
-GuardEvent::GuardEvent(GuardEvent&& move)
+GuardEvent::GuardEvent(GuardEvent&& move) noexcept
 : GuardFileDescriptor(std::move(move))
 {}
 
 GuardEvent::~GuardEvent() noexcept
 {
-    close_on_destruction<GuardFW::close>();  // may throw
+    close_on_destruction();  // may throw
 }
 
-uint64_t GuardEvent::get_counter() const
+uint64_t GuardEvent::get_counter_blocking() const
 {
     uint64_t expirations;
-    // ignore result, as buffer size is internally checked, see error EINVAL.
+    // ignore ::read result, as buffer size is internally checked, see error EINVAL.
+    GuardFW::read_ignore_result(handle, &expirations, sizeof(expirations));
+    return expirations;
+}
+
+uint64_t GuardEvent::get_counter_nonblocking() const
+{
+    uint64_t expirations;
+    // ignore ::read result, as buffer size is internally checked, see error EINVAL.
     bool not_blocking = GuardFW::read_nonblock_ignore_result(handle, &expirations, sizeof(expirations));
     return not_blocking ? expirations : 0;
 }
 
-void GuardEvent::add_couter(uint64_t add_to_counter) const
+void GuardEvent::add_couter_blocking(uint64_t add_to_counter) const
 {
     // writing to eventfd is always non-blocking.
-    // ignore result, as buffer size is internally checked, see error EINVAL.
+    // ignore ::write result, as buffer size is internally checked, see error EINVAL.
     GuardFW::write_ignore_result(handle, &add_to_counter, sizeof(add_to_counter));
+}
+
+bool GuardEvent::add_couter_nonblocking(uint64_t add_to_counter) const
+{
+    // writing to eventfd is always non-blocking.
+    // ignore ::write result, as buffer size is internally checked, see error EINVAL.
+    // returns 'false' if write would block due to a prevented overflow
+    bool not_blocking = GuardFW::write_nonblock_ignore_result(handle, &add_to_counter, sizeof(add_to_counter));
+    return not_blocking;
 }
 
 }  // namespace GuardFW

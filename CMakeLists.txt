@@ -83,6 +83,7 @@ set(public_headers
 
 set(library_sources
         src/exceptions.cpp
+        src/guard.cpp
         src/guard_event.cpp
         src/guard_file.cpp
         src/guard_message.cpp
