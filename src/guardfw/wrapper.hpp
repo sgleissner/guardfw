@@ -526,6 +526,10 @@ using ContextNonblockRepeatEINTR = Context<
     ErrorReport::exception,
     ErrorSpecial::eintr_repeats | ErrorSpecial::nonblock>;
 
+/// Pre-defined Context<> used for functions, which may return EINTR after signals and are allowed to return ETIMEDOUT
+using ContextRepeatEINTRSoftTimeout
+    = Context<ErrorIndication::eqm1_errno, ErrorReport::exception, ErrorSpecial::eintr_repeats, ETIMEDOUT>;
+
 /// Pre-defined Context<> used for getpriority(), like ContextStd, but with special errno handling
 using ContextMinus1ErrnoChanged = Context<ErrorIndication::eqm1_errno_changed>;
 
