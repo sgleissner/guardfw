@@ -20,7 +20,7 @@ GuardFW is a framework for using POSIX and other Linux API system calls in a sec
 - To make the usage easy, it is intended to provide at least one predefined, wrapped call for each system API call. The
   goal is to hide the complex template wrapper. It shall use the same or a similar name with the same arguments, but in
   the namespace GuardFW::. Using the wrappers instead of direct API calls allows the programmer to concentrate on the
-  functionality.
+  functionality. Pointers to single objects may be exchanged against references, if they are forbidden to be nullptr.
 - Additionally, logical connected functions are combined in Guards, which prevent some misusage. Guard constructors open
   kernel objects, destructors close them, member functions use them.
 - This is a Linux-only library. It is neither portable to other operating systems, nor is this planned.

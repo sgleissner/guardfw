@@ -57,6 +57,7 @@ if (COMPILE_COVERAGE)
 endif ()
 
 set(public_headers
+        src/guardfw/exceptions.hpp
         src/guardfw/file_descriptor.hpp
         src/guardfw/guard.hpp
         src/guardfw/guard_event.hpp
@@ -71,6 +72,7 @@ set(public_headers
         src/guardfw/wrapped_ioctl.hpp
         src/guardfw/wrapped_mqueue.hpp
         src/guardfw/wrapped_resource.hpp
+        src/guardfw/wrapped_signal.hpp
         src/guardfw/wrapped_signalfd.hpp
         src/guardfw/wrapped_socket.hpp
         src/guardfw/wrapped_timerfd.hpp

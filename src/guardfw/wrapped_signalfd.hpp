@@ -22,12 +22,12 @@ namespace GuardFW
 
 [[nodiscard]] inline static int signalfd(
     FileDescriptor fd,
-    const sigset_t* mask,
+    const sigset_t& mask,
     int flags,
     const std::source_location& source_location = std::source_location::current()
 )
 {
-    return ContextStd::wrapper<::signalfd>(source_location, fd, mask, flags);
+    return ContextStd::wrapper<::signalfd>(source_location, fd, &mask, flags);
 }
 
 }  // namespace GuardFW
