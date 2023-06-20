@@ -97,24 +97,24 @@ std::optional<size_t> GuardMessage::timedreceive_blocking(
 
 void GuardMessage::notify_set(const struct sigevent& sev, const std::source_location& source_location)
 {
-    mq_notify(handle, &sev, source_location);
+    GuardFW::mq_notify(handle, &sev, source_location);
 }
 
 void GuardMessage::notify_remove(const std::source_location& source_location)
 {
-    mq_notify(handle, nullptr, source_location);
+    GuardFW::mq_notify(handle, nullptr, source_location);
 }
 
 void GuardMessage::setattr(const struct mq_attr& newattr, const std::source_location& source_location)
 {
-    mq_setattr(handle, &newattr, nullptr, source_location);
+    GuardFW::mq_setattr(handle, &newattr, nullptr, source_location);
 }
 
 void GuardMessage::setattr(
     const struct mq_attr& newattr, struct mq_attr& oldattr, const std::source_location& source_location
 )
 {
-    mq_setattr(handle, &newattr, &oldattr, source_location);
+    GuardFW::mq_setattr(handle, &newattr, &oldattr, source_location);
 }
 
 void GuardMessage::getattr(struct mq_attr& attr, const std::source_location& source_location)
