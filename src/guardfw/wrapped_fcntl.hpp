@@ -34,14 +34,14 @@ concept FcntlOptArgConcept
     = std::is_void_v<T> || std::is_same_v<T, int> || std::is_same_v<T, unsigned int> || std::is_pointer_v<T>;
 
 
-[[nodiscard]] inline static FileDescriptor open(
+[[gnu::always_inline, nodiscard]] inline static FileDescriptor open(
     const char* pathname, int flags, const std::source_location& source_location = std::source_location::current()
 )
 {
     return ContextRepeatEINTR::wrapper<::open>(source_location, pathname, flags);
 }
 
-[[nodiscard]] inline static FileDescriptor open(
+[[gnu::always_inline, nodiscard]] inline static FileDescriptor open(
     const char* pathname,
     int flags,
     mode_t mode,
@@ -51,14 +51,14 @@ concept FcntlOptArgConcept
     return ContextRepeatEINTR::wrapper<::open>(source_location, pathname, flags, mode);
 }
 
-[[nodiscard]] inline static FileDescriptor creat(
+[[gnu::always_inline, nodiscard]] inline static FileDescriptor creat(
     const char* pathname, mode_t mode, const std::source_location& source_location = std::source_location::current()
 )
 {
     return ContextRepeatEINTR::wrapper<::creat>(source_location, pathname, mode);
 }
 
-[[nodiscard]] inline static FileDescriptor openat(
+[[gnu::always_inline, nodiscard]] inline static FileDescriptor openat(
     FileDescriptor dirfd,
     const char* pathname,
     int flags,
@@ -68,7 +68,7 @@ concept FcntlOptArgConcept
     return ContextRepeatEINTR::wrapper<::openat>(source_location, dirfd, pathname, flags);
 }
 
-[[nodiscard]] inline static FileDescriptor openat(
+[[gnu::always_inline, nodiscard]] inline static FileDescriptor openat(
     FileDescriptor dirfd,
     const char* pathname,
     int flags,
@@ -79,7 +79,7 @@ concept FcntlOptArgConcept
     return ContextRepeatEINTR::wrapper<::openat>(source_location, dirfd, pathname, flags, mode);
 }
 
-inline static void fcntl_noretval(
+[[gnu::always_inline]] inline static void fcntl_noretval(
     FileDescriptor fd, int cmd, const std::source_location& source_location = std::source_location::current()
 )
 {
@@ -87,14 +87,14 @@ inline static void fcntl_noretval(
 }
 
 template<FcntlArgConcept ARG>
-inline static void fcntl_noretval(
+[[gnu::always_inline]] inline static void fcntl_noretval(
     FileDescriptor fd, int cmd, ARG arg, const std::source_location& source_location = std::source_location::current()
 )
 {
     ContextRepeatEINTR::wrapper<::fcntl, void>(source_location, fd, cmd, arg);
 }
 
-[[nodiscard]] inline static int fcntl_retval(
+[[gnu::always_inline, nodiscard]] inline static int fcntl_retval(
     FileDescriptor fd, int cmd, const std::source_location& source_location = std::source_location::current()
 )
 {
@@ -102,14 +102,14 @@ inline static void fcntl_noretval(
 }
 
 template<FcntlArgConcept ARG>
-[[nodiscard]] inline static int fcntl_retval(
+[[gnu::always_inline, nodiscard]] inline static int fcntl_retval(
     FileDescriptor fd, int cmd, ARG arg, const std::source_location& source_location = std::source_location::current()
 )
 {
     return ContextRepeatEINTR::wrapper<::fcntl>(source_location, fd, cmd, arg);
 }
 
-[[nodiscard]] inline static unsigned int fcntl_retval_unsigned(
+[[gnu::always_inline, nodiscard]] inline static unsigned int fcntl_retval_unsigned(
     FileDescriptor fd, int cmd, const std::source_location& source_location = std::source_location::current()
 )
 {
@@ -117,7 +117,7 @@ template<FcntlArgConcept ARG>
 }
 
 template<FcntlArgConcept ARG>
-[[nodiscard]] inline static unsigned int fcntl_retval_unsigned(
+[[gnu::always_inline, nodiscard]] inline static unsigned int fcntl_retval_unsigned(
     FileDescriptor fd, int cmd, ARG arg, const std::source_location& source_location = std::source_location::current()
 )
 {

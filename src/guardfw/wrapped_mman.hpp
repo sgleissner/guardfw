@@ -13,7 +13,7 @@
 namespace GuardFW
 {
 
-[[nodiscard]] inline static void* mmap(
+[[gnu::always_inline, nodiscard]] inline static void* mmap(
     void* addr,
     size_t length,
     int prot,
@@ -23,24 +23,25 @@ namespace GuardFW
     const std::source_location& source_location = std::source_location::current()
 )
 {
+    // mmap indicates an error by ((void*)-1), not by nullptr, so use ContextStd with ErrorIndication::eqm1_errno
     return ContextStd::wrapper<::mmap>(source_location, addr, length, prot, flags, fd, offset);
 }
 
-inline static void munmap(
+[[gnu::always_inline]] inline static void munmap(
     void* addr, size_t length, const std::source_location& source_location = std::source_location::current()
 )
 {
     ContextStd::wrapper<::munmap, void>(source_location, addr, length);
 }
 
-inline static void mlock(
+[[gnu::always_inline]] inline static void mlock(
     const void* addr, size_t len, const std::source_location& source_location = std::source_location::current()
 )
 {
     ContextStd::wrapper<::mlock, void>(source_location, addr, len);
 }
 
-inline static void mlock2(
+[[gnu::always_inline]] inline static void mlock2(
     const void* addr,
     size_t len,
     unsigned int flags,
@@ -50,19 +51,23 @@ inline static void mlock2(
     ContextStd::wrapper<::mlock2, void>(source_location, addr, len, flags);
 }
 
-inline static void munlock(
+[[gnu::always_inline]] inline static void munlock(
     const void* addr, size_t len, const std::source_location& source_location = std::source_location::current()
 )
 {
     ContextStd::wrapper<::munlock, void>(source_location, addr, len);
 }
 
-inline static void mlockall(int flags, const std::source_location& source_location = std::source_location::current())
+[[gnu::always_inline]] inline static void mlockall(
+    int flags, const std::source_location& source_location = std::source_location::current()
+)
 {
     ContextStd::wrapper<::mlockall, void>(source_location, flags);
 }
 
-inline static void munlockall(const std::source_location& source_location = std::source_location::current())
+[[gnu::always_inline]] inline static void munlockall(
+    const std::source_location& source_location = std::source_location::current()
+)
 {
     ContextStd::wrapper<::munlockall, void>(source_location);
 }

@@ -25,35 +25,35 @@ namespace GuardFW
 
 // signal sets
 
-inline static void sigemptyset(
+[[gnu::always_inline]] inline static void sigemptyset(
     sigset_t& set, const std::source_location& source_location = std::source_location::current()
 )
 {
     ContextStd::wrapper<::sigemptyset, void>(source_location, &set);
 }
 
-inline static void sigfillset(
+[[gnu::always_inline]] inline static void sigfillset(
     sigset_t& set, const std::source_location& source_location = std::source_location::current()
 )
 {
     ContextStd::wrapper<::sigfillset, void>(source_location, &set);
 }
 
-inline static void sigaddset(
+[[gnu::always_inline]] inline static void sigaddset(
     sigset_t& set, int signum, const std::source_location& source_location = std::source_location::current()
 )
 {
     ContextStd::wrapper<::sigaddset, void>(source_location, &set, signum);
 }
 
-inline static void sigdelset(
+[[gnu::always_inline]] inline static void sigdelset(
     sigset_t& set, int signum, const std::source_location& source_location = std::source_location::current()
 )
 {
     ContextStd::wrapper<::sigdelset, void>(source_location, &set, signum);
 }
 
-[[nodiscard]] inline static bool sigismember(
+[[gnu::always_inline, nodiscard]] inline static bool sigismember(
     const sigset_t& set, int signum, const std::source_location& source_location = std::source_location::current()
 )
 {
@@ -61,14 +61,14 @@ inline static void sigdelset(
 }
 
 
-[[nodiscard]] inline static bool sigisemptyset(
+[[gnu::always_inline, nodiscard]] inline static bool sigisemptyset(
     const sigset_t& set, const std::source_location& source_location = std::source_location::current()
 )
 {
     return ContextNoErrors::wrapper<::sigisemptyset, bool>(source_location, &set);
 }
 
-inline static void sigorset(
+[[gnu::always_inline]] inline static void sigorset(
     sigset_t& dest,
     const sigset_t& left,
     const sigset_t& right,
@@ -78,7 +78,7 @@ inline static void sigorset(
     ContextStd::wrapper<::sigorset, void>(source_location, &dest, &left, &right);
 }
 
-inline static void sigandset(
+[[gnu::always_inline]] inline static void sigandset(
     sigset_t& dest,
     const sigset_t& left,
     const sigset_t& right,
@@ -90,7 +90,7 @@ inline static void sigandset(
 
 // signal masks
 
-inline static void sigprocmask(
+[[gnu::always_inline]] inline static void sigprocmask(
     int how,
     const sigset_t* set,
     sigset_t* oldset,
@@ -100,7 +100,7 @@ inline static void sigprocmask(
     ContextStd::wrapper<::sigprocmask, void>(source_location, how, set, oldset);
 }
 
-inline static void pthread_sigmask(
+[[gnu::always_inline]] inline static void pthread_sigmask(
     int how,
     const sigset_t* set,
     sigset_t* oldset,

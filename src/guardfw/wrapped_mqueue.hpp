@@ -23,14 +23,14 @@ static_assert(std::is_same_v<mqd_t, GuardFW::FileDescriptor>, "mqd_t and FileDes
 namespace GuardFW
 {
 
-[[nodiscard]] inline static mqd_t mq_open(
+[[gnu::always_inline, nodiscard]] inline static mqd_t mq_open(
     const char* name, int oflag, const std::source_location& source_location = std::source_location::current()
 )
 {
     return ContextStd::wrapper<::mq_open>(source_location, name, oflag);
 }
 
-[[nodiscard]] inline static mqd_t mq_open(
+[[gnu::always_inline, nodiscard]] inline static mqd_t mq_open(
     const char* name,
     int oflag,
     mode_t mode,
@@ -41,26 +41,28 @@ namespace GuardFW
     return ContextStd::wrapper<::mq_open>(source_location, name, oflag, mode, attr);
 }
 
-inline static void mq_close(mqd_t mqdes, const std::source_location& source_location = std::source_location::current())
+[[gnu::always_inline]] inline static void mq_close(
+    mqd_t mqdes, const std::source_location& source_location = std::source_location::current()
+)
 {
     ContextStd::wrapper<::mq_close, void>(source_location, mqdes);
 }
 
-[[nodiscard]] inline static Error mq_close_direct_errors(
+[[gnu::always_inline, nodiscard]] inline static Error mq_close_direct_errors(
     mqd_t mqdes, const std::source_location& source_location = std::source_location::current()
 ) noexcept
 {
     return ContextDirectErrors::wrapper<::mq_close, void>(source_location, mqdes);
 }
 
-inline static void mq_close_ignore_errors(
+[[gnu::always_inline]] inline static void mq_close_ignore_errors(
     mqd_t mqdes, const std::source_location& source_location = std::source_location::current()
 ) noexcept
 {
     ContextIgnoreErrors::wrapper<::mq_close, void>(source_location, mqdes);
 }
 
-inline static void mq_send(
+[[gnu::always_inline]] inline static void mq_send(
     mqd_t mqdes,
     const char* msg_ptr,
     size_t msg_len,
@@ -71,7 +73,7 @@ inline static void mq_send(
     ContextRepeatEINTR::wrapper<::mq_send, void>(source_location, mqdes, msg_ptr, msg_len, msg_prio);
 }
 
-[[nodiscard]] inline static bool mq_send_nonblock(
+[[gnu::always_inline, nodiscard]] inline static bool mq_send_nonblock(
     mqd_t mqdes,
     const char* msg_ptr,
     size_t msg_len,
@@ -82,7 +84,8 @@ inline static void mq_send(
     return ContextNonblockRepeatEINTR::wrapper<::mq_send, void>(source_location, mqdes, msg_ptr, msg_len, msg_prio);
 }
 
-inline static bool mq_timedsend(  // call to mq_timedsend only allowed when O_NONBLOCK is not set
+[[gnu::always_inline, nodiscard]] inline static bool
+mq_timedsend(  // call to mq_timedsend only allowed when O_NONBLOCK is not set
     mqd_t mqdes,
     const char* msg_ptr,
     size_t msg_len,
@@ -97,7 +100,7 @@ inline static bool mq_timedsend(  // call to mq_timedsend only allowed when O_NO
     return (timedsend_error == GuardFW::no_error);
 }
 
-[[nodiscard]] inline static size_t mq_receive(
+[[gnu::always_inline, nodiscard]] inline static size_t mq_receive(
     mqd_t mqdes,
     char* msg_ptr,
     size_t msg_len,
@@ -108,7 +111,7 @@ inline static bool mq_timedsend(  // call to mq_timedsend only allowed when O_NO
     return ContextRepeatEINTR::wrapper<::mq_receive, size_t>(source_location, mqdes, msg_ptr, msg_len, msg_prio);
 }
 
-[[nodiscard]] inline static std::optional<size_t> mq_receive_nonblock(
+[[gnu::always_inline, nodiscard]] inline static std::optional<size_t> mq_receive_nonblock(
     mqd_t mqdes,
     char* msg_ptr,
     size_t msg_len,
@@ -121,7 +124,7 @@ inline static bool mq_timedsend(  // call to mq_timedsend only allowed when O_NO
     );
 }
 
-[[nodiscard]] inline static std::optional<size_t>
+[[gnu::always_inline, nodiscard]] inline static std::optional<size_t>
 mq_timedreceive(  // call to mq_timedsend only allowed when O_NONBLOCK is not set
     mqd_t mqdes,
     char* __restrict__ msg_ptr,
@@ -141,7 +144,7 @@ mq_timedreceive(  // call to mq_timedsend only allowed when O_NONBLOCK is not se
         return std::nullopt;  // Timeout
 }
 
-inline static void mq_notify(
+[[gnu::always_inline]] inline static void mq_notify(
     mqd_t mqdes,
     const struct sigevent* sevp,
     const std::source_location& source_location = std::source_location::current()
@@ -150,7 +153,7 @@ inline static void mq_notify(
     ContextStd::wrapper<::mq_notify, void>(source_location, mqdes, sevp);
 }
 
-inline static void mq_setattr(
+[[gnu::always_inline]] inline static void mq_setattr(
     mqd_t mqdes,
     const struct mq_attr* __restrict__ newattr,
     struct mq_attr* __restrict__ oldattr,
@@ -160,14 +163,14 @@ inline static void mq_setattr(
     ContextStd::wrapper<::mq_setattr, void>(source_location, mqdes, newattr, oldattr);
 }
 
-inline static void mq_getattr(
+[[gnu::always_inline]] inline static void mq_getattr(
     mqd_t mqdes, struct mq_attr* attr, const std::source_location& source_location = std::source_location::current()
 )
 {
     ContextStd::wrapper<::mq_getattr, void>(source_location, mqdes, attr);
 }
 
-inline static void mq_unlink(
+[[gnu::always_inline]] inline static void mq_unlink(
     const char* name, const std::source_location& source_location = std::source_location::current()
 )
 {

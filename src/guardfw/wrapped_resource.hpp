@@ -20,14 +20,14 @@
 namespace GuardFW
 {
 
-[[nodiscard]] inline static int getpriority(
+[[gnu::always_inline, nodiscard]] inline static int getpriority(
     int which, id_t who, const std::source_location& source_location = std::source_location::current()
 )
 {
     return ContextMinus1ErrnoChanged::wrapper<::getpriority>(source_location, which, who);
 }
 
-inline static void setpriority(
+[[gnu::always_inline]] inline static void setpriority(
     int which, id_t who, int prio, const std::source_location& source_location = std::source_location::current()
 )
 {
