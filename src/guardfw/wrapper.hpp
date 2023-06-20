@@ -79,7 +79,7 @@ enum class ErrorSpecial : uint8_t
  * @param  rv  right-hand value to be bitwise ORed
  * @return     result of bitwise ORed enum values
  */
-consteval ErrorSpecial operator|(ErrorSpecial lv, ErrorSpecial rv)
+constexpr ErrorSpecial operator|(ErrorSpecial lv, ErrorSpecial rv)
 {
     using UnderlyingType = std::underlying_type_t<ErrorSpecial>;
     return static_cast<ErrorSpecial>(static_cast<UnderlyingType>(lv) | static_cast<UnderlyingType>(rv));
@@ -92,7 +92,7 @@ consteval ErrorSpecial operator|(ErrorSpecial lv, ErrorSpecial rv)
  * @param  rv  right-hand value to be bitwise ANDed
  * @return     result of bitwise ANDed enum values
  */
-consteval ErrorSpecial operator&(ErrorSpecial lv, ErrorSpecial rv)
+constexpr ErrorSpecial operator&(ErrorSpecial lv, ErrorSpecial rv)
 {
     using UnderlyingType = std::underlying_type_t<ErrorSpecial>;
     return static_cast<ErrorSpecial>(static_cast<UnderlyingType>(lv) & static_cast<UnderlyingType>(rv));
