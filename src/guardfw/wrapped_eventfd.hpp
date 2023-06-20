@@ -21,7 +21,7 @@
 namespace GuardFW
 {
 
-[[nodiscard]] inline static FileDescriptor eventfd(
+[[gnu::always_inline, nodiscard]] inline static FileDescriptor eventfd(
     unsigned int initval, int flags, const std::source_location& source_location = std::source_location::current()
 )
 {

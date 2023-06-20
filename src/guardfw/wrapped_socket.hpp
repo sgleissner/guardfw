@@ -26,14 +26,14 @@
 namespace GuardFW
 {
 
-[[nodiscard]] inline static int socket(
+[[gnu::always_inline, nodiscard]] inline static int socket(
     int domain, int type, int protocol, const std::source_location& source_location = std::source_location::current()
 )
 {
     return ContextStd::wrapper<::socket>(source_location, domain, type, protocol);
 }
 
-[[nodiscard]] inline static int accept(
+[[gnu::always_inline, nodiscard]] inline static int accept(
     int sockfd,
     struct sockaddr* __restrict__ addr,
     socklen_t* __restrict__ addrlen,
@@ -43,7 +43,7 @@ namespace GuardFW
     return ContextRepeatEINTR::wrapper<::accept>(source_location, sockfd, addr, addrlen);
 }
 
-[[nodiscard]] inline static std::optional<int> accept_nonblock(
+[[gnu::always_inline, nodiscard]] inline static std::optional<int> accept_nonblock(
     int sockfd,
     struct sockaddr* __restrict__ addr,
     socklen_t* __restrict__ addrlen,
@@ -53,7 +53,7 @@ namespace GuardFW
     return ContextNonblockRepeatEINTR::wrapper<::accept>(source_location, sockfd, addr, addrlen);
 }
 
-[[nodiscard]] inline static int accept4(
+[[gnu::always_inline, nodiscard]] inline static int accept4(
     int sockfd,
     struct sockaddr* __restrict__ addr,
     socklen_t* __restrict__ addrlen,
@@ -64,7 +64,7 @@ namespace GuardFW
     return ContextRepeatEINTR::wrapper<::accept4>(source_location, sockfd, addr, addrlen, flags);
 }
 
-[[nodiscard]] inline static std::optional<int> accept4_nonblock(
+[[gnu::always_inline, nodiscard]] inline static std::optional<int> accept4_nonblock(
     int sockfd,
     struct sockaddr* __restrict__ addr,
     socklen_t* __restrict__ addrlen,
@@ -75,7 +75,7 @@ namespace GuardFW
     return ContextNonblockRepeatEINTR::wrapper<::accept4>(source_location, sockfd, addr, addrlen, flags);
 }
 
-inline static void bind(
+[[gnu::always_inline]] inline static void bind(
     int sockfd,
     const struct sockaddr* addr,
     socklen_t addrlen,
@@ -85,7 +85,7 @@ inline static void bind(
     ContextStd::wrapper<::bind, void>(source_location, sockfd, addr, addrlen);
 }
 
-inline static void connect(
+[[gnu::always_inline]] inline static void connect(
     int sockfd,
     const struct sockaddr* addr,
     socklen_t addrlen,
@@ -101,14 +101,14 @@ inline static void connect(
 // 	return ContextPosix_RepeatEINTR_Nonblock::wrapper<::connect, void>(source_location, sockfd, addr, addrlen);
 // }
 
-inline static void listen(
+[[gnu::always_inline]] inline static void listen(
     int sockfd, int backlog, const std::source_location& source_location = std::source_location::current()
 )
 {
     ContextStd::wrapper<::listen, void>(source_location, sockfd, backlog);
 }
 
-[[nodiscard]] inline static size_t send(
+[[gnu::always_inline, nodiscard]] inline static size_t send(
     int sockfd,
     const void* buf,
     size_t len,
@@ -119,7 +119,7 @@ inline static void listen(
     return ContextRepeatEINTR::wrapper<::send, size_t>(source_location, sockfd, buf, len, flags);
 }
 
-[[nodiscard]] inline static std::optional<size_t> send_nonblock(
+[[gnu::always_inline, nodiscard]] inline static std::optional<size_t> send_nonblock(
     int sockfd,
     const void* buf,
     size_t len,
@@ -130,7 +130,7 @@ inline static void listen(
     return ContextNonblockRepeatEINTR::wrapper<::send, size_t>(source_location, sockfd, buf, len, flags);
 }
 
-[[nodiscard]] inline static size_t sendto(
+[[gnu::always_inline, nodiscard]] inline static size_t sendto(
     int sockfd,
     const void* buf,
     size_t len,
@@ -143,7 +143,7 @@ inline static void listen(
     return ContextRepeatEINTR::wrapper<::sendto, size_t>(source_location, sockfd, buf, len, flags, dest_addr, addrlen);
 }
 
-[[nodiscard]] inline static std::optional<size_t> sendto_nonblock(
+[[gnu::always_inline, nodiscard]] inline static std::optional<size_t> sendto_nonblock(
     int sockfd,
     const void* buf,
     size_t len,
@@ -158,7 +158,7 @@ inline static void listen(
     );
 }
 
-[[nodiscard]] inline static size_t sendmsg(
+[[gnu::always_inline, nodiscard]] inline static size_t sendmsg(
     int sockfd,
     const struct msghdr* msg,
     int flag,
@@ -168,7 +168,7 @@ inline static void listen(
     return ContextRepeatEINTR::wrapper<::sendmsg, size_t>(source_location, sockfd, msg, flag);
 }
 
-[[nodiscard]] inline static std::optional<size_t> sendmsg_nonblock(
+[[gnu::always_inline, nodiscard]] inline static std::optional<size_t> sendmsg_nonblock(
     int sockfd,
     const struct msghdr* msg,
     int flag,
@@ -178,7 +178,7 @@ inline static void listen(
     return ContextNonblockRepeatEINTR::wrapper<::sendmsg, size_t>(source_location, sockfd, msg, flag);
 }
 
-[[nodiscard]] inline static size_t recv(
+[[gnu::always_inline, nodiscard]] inline static size_t recv(
     int sockfd,
     void* buf,
     size_t len,
@@ -189,7 +189,7 @@ inline static void listen(
     return ContextRepeatEINTR::wrapper<::recv, size_t>(source_location, sockfd, buf, len, flags);
 }
 
-[[nodiscard]] inline static std::optional<size_t> recv_nonblock(
+[[gnu::always_inline, nodiscard]] inline static std::optional<size_t> recv_nonblock(
     int sockfd,
     void* buf,
     size_t len,
@@ -200,7 +200,7 @@ inline static void listen(
     return ContextNonblockRepeatEINTR::wrapper<::recv, size_t>(source_location, sockfd, buf, len, flags);
 }
 
-[[nodiscard]] inline static size_t recvfrom(
+[[gnu::always_inline, nodiscard]] inline static size_t recvfrom(
     int sockfd,
     void* __restrict__ buf,
     size_t len,
@@ -213,7 +213,7 @@ inline static void listen(
     return ContextRepeatEINTR::wrapper<::recvfrom, size_t>(source_location, sockfd, buf, len, flags, src_addr, addrlen);
 }
 
-[[nodiscard]] inline static std::optional<size_t> recvfrom_nonblock(
+[[gnu::always_inline, nodiscard]] inline static std::optional<size_t> recvfrom_nonblock(
     int sockfd,
     void* __restrict__ buf,
     size_t len,
@@ -228,7 +228,7 @@ inline static void listen(
     );
 }
 
-[[nodiscard]] inline static size_t recvmsg(
+[[gnu::always_inline, nodiscard]] inline static size_t recvmsg(
     int sockfd,
     struct msghdr* msg,
     int flags,
@@ -238,8 +238,8 @@ inline static void listen(
     return ContextRepeatEINTR::wrapper<::recvmsg, size_t>(source_location, sockfd, msg, flags);
 }
 
-[[nodiscard]] inline static std::optional<size_t> recvmsg_nonblock(int sockfd, struct msghdr* msg, int flags),
-    const std::source_location &source_location = std::source_location::current()
+[[gnu::always_inline, nodiscard]] inline static std::optional<size_t>
+recvmsg_nonblock(int sockfd, struct msghdr* msg, int flags), const std::source_location &source_location = std::source_location::current()
 {
     return ContextPosix_RepeatEINTR_Nonblock::wrapper<::recvmsg, size_t>(source_location, sockfd, msg, flags);
 }

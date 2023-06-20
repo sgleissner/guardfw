@@ -30,7 +30,7 @@ namespace GuardFW
 
 // read
 
-[[nodiscard]] inline static size_t read(
+[[gnu::always_inline, nodiscard]] inline static size_t read(
     FileDescriptor fd,
     void* buf,  // NOSONAR: allow void*
     size_t count,
@@ -40,7 +40,7 @@ namespace GuardFW
     return ContextRepeatEINTR::wrapper<::read, size_t>(source_location, fd, buf, count);
 }
 
-[[nodiscard]] inline static std::optional<size_t> read_nonblock(
+[[gnu::always_inline, nodiscard]] inline static std::optional<size_t> read_nonblock(
     FileDescriptor fd,
     void* buf,  // NOSONAR: allow void*
     size_t count,
@@ -51,7 +51,7 @@ namespace GuardFW
 }
 
 // used for eventfd
-inline static void read_ignore_result(
+[[gnu::always_inline]] inline static void read_ignore_result(
     FileDescriptor fd,
     void* buf,  // NOSONAR: allow void*
     size_t count,
@@ -62,7 +62,7 @@ inline static void read_ignore_result(
 }
 
 // used for eventfd
-[[nodiscard]] inline static bool read_nonblock_ignore_result(
+[[gnu::always_inline, nodiscard]] inline static bool read_nonblock_ignore_result(
     FileDescriptor fd,
     void* buf,  // NOSONAR: allow void*
     size_t count,
@@ -74,7 +74,7 @@ inline static void read_ignore_result(
 
 // write
 
-[[nodiscard]] inline static size_t write(
+[[gnu::always_inline, nodiscard]] inline static size_t write(
     FileDescriptor fd,
     void* buf,  // NOSONAR: allow void*
     size_t count,
@@ -84,7 +84,7 @@ inline static void read_ignore_result(
     return ContextRepeatEINTR::wrapper<::write, size_t>(source_location, fd, buf, count);
 }
 
-[[nodiscard]] inline static std::optional<size_t> write_nonblock(
+[[gnu::always_inline, nodiscard]] inline static std::optional<size_t> write_nonblock(
     FileDescriptor fd,
     void* buf,  // NOSONAR: allow void*
     size_t count,
@@ -95,7 +95,7 @@ inline static void read_ignore_result(
 }
 
 // used for eventfd
-inline void write_ignore_result(
+[[gnu::always_inline]] inline void write_ignore_result(
     FileDescriptor fd,
     void* buf,  // NOSONAR: allow void*
     size_t count,
@@ -106,7 +106,7 @@ inline void write_ignore_result(
 }
 
 // used for eventfd
-[[nodiscard]] inline bool write_nonblock_ignore_result(
+[[gnu::always_inline, nodiscard]] inline bool write_nonblock_ignore_result(
     FileDescriptor fd,
     void* buf,  // NOSONAR: allow void*
     size_t count,
@@ -119,7 +119,7 @@ inline void write_ignore_result(
 // close
 
 // Ignores EINTR, throws all other errors
-inline static void close(
+[[gnu::always_inline]] inline static void close(
     FileDescriptor fd, const std::source_location& source_location = std::source_location::current()
 )
 {
@@ -130,7 +130,7 @@ inline static void close(
 
 // void ::sync() currently not handled, as it needs no wrapper
 
-inline static void syncfs(
+[[gnu::always_inline]] inline static void syncfs(
     FileDescriptor fd, const std::source_location& source_location = std::source_location::current()
 )
 {
@@ -139,14 +139,14 @@ inline static void syncfs(
 
 // lseek
 
-[[nodiscard]] inline static off_t lseek(
+[[gnu::always_inline, nodiscard]] inline static off_t lseek(
     int fd, off_t offset, int whence, const std::source_location& source_location = std::source_location::current()
 )
 {
     return ContextStd::wrapper<::lseek>(source_location, fd, offset, whence);
 }
 
-[[nodiscard]] inline static off64_t lseek64(
+[[gnu::always_inline, nodiscard]] inline static off64_t lseek64(
     int fd, off64_t offset, int whence, const std::source_location& source_location = std::source_location::current()
 )
 {

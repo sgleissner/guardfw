@@ -19,14 +19,14 @@
 namespace GuardFW
 {
 
-[[nodiscard]] inline static int timerfd_create(
+[[gnu::always_inline, nodiscard]] inline static int timerfd_create(
     int clockid, int flags, const std::source_location& source_location = std::source_location::current()
 )
 {
     return ContextStd::wrapper<::timerfd_create>(source_location, clockid, flags);
 }
 
-inline static void timerfd_settime(
+[[gnu::always_inline]] inline static void timerfd_settime(
     int fd,
     int flags,
     const struct itimerspec* new_value,
@@ -37,7 +37,7 @@ inline static void timerfd_settime(
     ContextStd::wrapper<::timerfd_settime, void>(source_location, fd, flags, new_value, old_value);
 }
 
-inline static void timerfd_gettime(
+[[gnu::always_inline]] inline static void timerfd_gettime(
     int fd, struct itimerspec* curr_value, const std::source_location& source_location = std::source_location::current()
 )
 {

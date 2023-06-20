@@ -20,7 +20,7 @@
 namespace GuardFW
 {
 
-[[nodiscard]] inline static int signalfd(
+[[gnu::always_inline, nodiscard]] inline static int signalfd(
     FileDescriptor fd,
     const sigset_t& mask,
     int flags,
