@@ -1,6 +1,13 @@
-//
-// Created by simon on 20.06.23.
-//
+/**
+ * Wrappers for system header sys/mman.h
+ *
+ * This is a convenience header for encapsulating ugly wrapper<>() calls to Linux API and POSIX functions
+ * to nice looking calls with the same or similar name & API, but separate error handling.
+ *
+ * @author    Simon Gleissner <simon@gleissner.de>, http://guardfw.de
+ * @copyright MIT license, see file LICENSE
+ * @file
+ */
 
 #ifndef GUARDFW_WRAPPED_MMAN_HPP
 #define GUARDFW_WRAPPED_MMAN_HPP
