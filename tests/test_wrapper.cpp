@@ -98,10 +98,10 @@ TEST_CASE("wrapper: success, returns unsigned int", "[wrapper]")
 TEST_CASE("wrapper: error, throws", "[wrapper]")
 {
     std::ostringstream what;
-    what << "In function '" << fixloc.function_name()  // copied from ContextPosix<>::throw_function()
+    what << "in function '" << fixloc.function_name()  // copied from ContextPosix<>::throw_function()
          << "' in file '" << fixloc.file_name()        // copied from ContextPosix<>::throw_function()
          << "' at line " << fixloc.line()              // copied from ContextPosix<>::throw_function()
-         << ": wrappers call to 'tester_std()' failed with error 22: Invalid argument";
+         << ": wrapped call to 'tester_std()' failed with error 22: Invalid argument";
 
     CHECK(std::is_same_v<int, GuardFW::ReturnType<GuardFW::ContextStd::wrapper<tester_std, int, int, unsigned int>>>);
     CHECK_THROWS_AS(GuardFW::ContextStd::wrapper<tester_std>(fixloc, 0, EINVAL), std::system_error);
