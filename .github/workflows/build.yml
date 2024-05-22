@@ -9,7 +9,8 @@ on:
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-22.04  # was: ubuntu-latest = 20.04 - sgl 2022-10-13
+    #    runs-on: ubuntu-22.04  # was: ubuntu-latest = 20.04 - sgl 2022-10-13
+    runs-on: ubuntu-24.04  # sgl 2024-05-24
     env:
       SONAR_SCANNER_VERSION: 4.8.0.2856  # sgl 2023-01-16
       SONAR_SERVER_URL: "https://sonarcloud.io"
