@@ -11,7 +11,8 @@ jobs:
     name: Build
     runs-on: ubuntu-24.04
     env:
-      SONAR_SCANNER_VERSION: 4.8.0.2856  # sgl 2023-01-16
+      #      SONAR_SCANNER_VERSION: 4.8.0.2856  # sgl 2023-01-16
+      SONAR_SCANNER_VERSION: 5.0.1.3006  # sgl 2024-05-24
       SONAR_SERVER_URL: "https://sonarcloud.io"
       # see https://binaries.sonarsource.com/?prefix=Distribution/sonar-scanner-cli/
       BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory # Directory where build-wrapper output will be placed
