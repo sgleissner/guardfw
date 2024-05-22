@@ -82,3 +82,20 @@ include(cmake-includes/generic-setup.cmake)      # generic project setup & helpe
 include(cmake-includes/generic-sonarqube.cmake)  # generic SonarQube support
 include(cmake-includes/generic-library.cmake)    # generic c++ module-based library
 include(cmake-includes/generic-tests.cmake)      # generic Catch2 unit tests
+
+# small example application
+
+add_executable(example)
+
+target_sources(example
+        PRIVATE
+        src/example.cpp
+)
+
+target_link_libraries(example PRIVATE
+        ${target_modules}
+        -lrt
+        -pthread
+)
+
+add_dependencies(guardfw-tests example)
