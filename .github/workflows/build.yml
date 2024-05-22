@@ -19,10 +19,10 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
-      - name: Install gcc 13
+      - name: Install gcc 14
         run: |
           sudo apt-get update
-          sudo apt-get install gcc-13 g++-13
+          sudo apt-get install gcc-14 g++-14
       - name: Install gcovr 6
         run: |
           pip install gcovr
@@ -31,8 +31,8 @@ jobs:
           cd $HOME
           git clone https://github.com/catchorg/Catch2.git
           cd $HOME/Catch2/
-          export CC=/usr/bin/gcc-13
-          export CXX=/usr/bin/g++-13
+          export CC=/usr/bin/gcc-14
+          export CXX=/usr/bin/g++-14
           cmake -Bbuild -H. -DBUILD_TESTING=OFF
           sudo cmake --build build/ --target install -j 2
       - name: Build & run unit tests
@@ -41,8 +41,8 @@ jobs:
           PRJROOT=$(pwd)
           mkdir -p unittests/64
           mkdir -p unittests/reports
-          export CC=/usr/bin/gcc-13
-          export CXX=/usr/bin/g++-13
+          export CC=/usr/bin/gcc-14
+          export CXX=/usr/bin/g++-14
           echo "### run cmake ###"
           cmake -D COMPILE_COVERAGE=ON -S . -B unittests/64
           # cmake -D COMPILE_COVERAGE=ON -D COMPILE_32BIT=ON -S . -B unittests/32
@@ -53,8 +53,8 @@ jobs:
           echo "### run unit tests ###"
           ./guardfw-tests --reporter console::out=-::colour-mode=ansi --reporter SonarQube::out=../reports/unittest-x86_64.xml
           echo "### generate gcov files ###"
-          find . -name "*.gcno" -exec xargs gcov-13 -b -l -p -c \{\} \;
-          # find . -name "*.gcno" | xargs gcov-13 -b -l -p -c
+          find . -name "*.gcno" -exec xargs gcov-14 -b -l -p -c \{\} \;
+          # find . -name "*.gcno" | xargs gcov-14 -b -l -p -c
           echo "### run gcovr ###"          
           gcovr -g -k --root ../.. --sonarqube ../reports/coverage-x86_64.xml --print-summary --gcov-ignore-parse-errors=negative_hits.warn_once_per_file
           popd
@@ -96,8 +96,8 @@ jobs:
       - name: Run Sonar build-wrapper
         run: |
           mkdir build
-          export CC=/usr/bin/gcc-13
-          export CXX=/usr/bin/g++-13
+          export CC=/usr/bin/gcc-14
+          export CXX=/usr/bin/g++-14
           cmake -S . -B build
           build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build build/ --config Release
       - name: Run sonar-scanner
