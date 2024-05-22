@@ -9,8 +9,7 @@ sonar.organization=sgleissner
 sonar.projectVersion=@PROJECT_VERSION@
 
 # Path is relative to the sonar-project.properties file.
-sonar.sources=modules/
-#sonar.exclusions=src/tests/**/*
+sonar.sources=modules/,src/
 sonar.tests=tests/
 
 # Encoding of the source code.
