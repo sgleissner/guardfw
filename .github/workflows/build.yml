@@ -26,7 +26,7 @@ jobs:
           sudo apt-get install gcc-14 g++-14
       - name: Install gcovr 6
         run: |
-          pip install gcovr
+          pip install --break-system-packages gcovr
       - name: Install latest Catch2 from git repository
         run: |
           cd $HOME
