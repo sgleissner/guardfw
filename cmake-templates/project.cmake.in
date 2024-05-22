@@ -1,0 +1,36 @@
+# @file_generated_warning@
+
+set(@CMAKE_PROJECT_NAME@_MODULES_SOURCES @install_modules@)
+
+list(TRANSFORM @CMAKE_PROJECT_NAME@_MODULES_SOURCES PREPEND "${@CMAKE_PROJECT_NAME@_MODULES_DIR}/")
+
+add_library(@CMAKE_PROJECT_NAME@_TARGET)
+
+set_target_properties(@CMAKE_PROJECT_NAME@_TARGET
+        PROPERTIES
+            CXX_STANDARD 23
+)
+
+target_compile_options(@CMAKE_PROJECT_NAME@_TARGET
+        PRIVATE
+            -Wall
+            -Wextra
+            -Wpedantic
+            -Wconversion
+            -Wno-terminate
+            -Werror
+            -O3
+        PUBLIC
+            -fmodules-ts
+)
+
+target_sources(@CMAKE_PROJECT_NAME@_TARGET PUBLIC
+        FILE_SET @CMAKE_PROJECT_NAME@_FILESET
+        TYPE CXX_MODULES
+        BASE_DIRS ${@CMAKE_PROJECT_NAME@_MODULES_DIR}
+        FILES ${@CMAKE_PROJECT_NAME@_MODULES_SOURCES}
+)
+
+add_library(@install_target@
+         ALIAS @CMAKE_PROJECT_NAME@_TARGET
+)

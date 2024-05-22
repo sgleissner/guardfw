@@ -13,13 +13,27 @@
 
 #include <guardfw/guard.hpp>
 #include <guardfw/wrapped_unistd.hpp>
+#include <guardfw/wrapped_stdio.hpp>
 
 namespace GuardFW
 {
 
 void GuardFileDescriptor::close_on_destruction(const std::source_location& source_location)
 {
-    Guard::close_on_destruction<GuardFW::close>(source_location);  // may throw
+    if (!is_invalid())
+    {
+        GuardFW::close(handle, source_location);
+        invalidate();
+    }
+}
+
+void GuardFileStream::close_on_destruction(const std::source_location& source_location)
+{
+    if (!is_invalid())
+    {
+        GuardFW::fclose(handle, source_location);
+        invalidate();
+    }
 }
 
 }  // namespace GuardFW

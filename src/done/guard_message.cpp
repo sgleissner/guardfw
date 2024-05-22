@@ -36,7 +36,12 @@ GuardMessage::GuardMessage(GuardMessage&& move) noexcept
 
 GuardMessage::~GuardMessage() noexcept
 {
-    Guard::close_on_destruction<GuardFW::mq_close>(std::source_location::current());  // may throw
+    // POSIX message queues are not closed with standard ::close()
+    if (!is_invalid())
+    {
+        GuardFW::mq_close(handle);  // may throw in case of invalid handle, this will directly call terminate()
+        invalidate();
+    }
 }
 
 void GuardMessage::send_blocking(

@@ -3,7 +3,7 @@
  *
  * The headers sys/timerfd.h and linux/timerfd.h have a nasty incompatibility, which causes
  * a lot of redefinition errors when compiled together. As only the constant TFD_IOC_SET_TICKS
- * is needed from linux/timerfd.h, this is wrapped, stored and exported in a separate variable.
+ * is needed from linux/timerfd.h, this is wrappers, stored and exported in a separate variable.
  *
  * @author    Simon Gleissner <simon@gleissner.de>, http://guardfw.de
  * @copyright MIT license, see file LICENSE

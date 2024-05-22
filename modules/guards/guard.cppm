@@ -11,16 +11,18 @@
  * @file
  */
 
-#pragma once
-#ifndef GUARDFW_GUARD_HPP
-#define GUARDFW_GUARD_HPP
+module;
 
 #include <stdexcept>        // std::logic_error
 #include <source_location>  // std::source_location
 #include <cstdio>           // FILE
 
-#include <guardfw/file_descriptor.hpp>
-#include <guardfw/wrapped_fcntl.hpp>
+export module guardfw.guard;
+
+import guardfw.file_desciptor;
+import guardfw.wrapped_fcntl;
+import guardfw.wrapped_unistd;
+import guardfw.wrapped_stdio;
 
 namespace GuardFW
 {
@@ -35,26 +37,26 @@ namespace GuardFW
  * @tparam HANDLE         Type of the kernel object handle/destructor, e.g. int or FILE*.
  * @tparam INVALID_HANDLE Constant, which describes an invalid marker, e.g. -1 or nullptr.
  */
-template<typename HANDLE, HANDLE INVALID_HANDLE>
+export template<typename HANDLE, HANDLE INVALID_HANDLE>
 class Guard
 {
 public:
-    using Handle = HANDLE;                                    ///< exports the HANDLE template type
+    using Handle                           = HANDLE;          ///< exports the HANDLE template type
     constexpr static Handle invalid_handle = INVALID_HANDLE;  ///< exports the INVALID_HANDLE template value
 
 protected:
-    Guard() = delete;
-    Guard(const Guard&) = delete;
+    Guard()                        = delete;
+    Guard(const Guard&)            = delete;
     Guard& operator=(const Guard&) = delete;
-    Guard& operator=(Guard&&) = delete;
+    Guard& operator=(Guard&&)      = delete;
 
     /**
      * Standard constructor for base guard class.
      * Will be called from derived class constructors for storing the handle.
      * @param handle_init handle to store.
      */
-    explicit Guard(Handle handle_init)
-    : handle(handle_init)
+    explicit Guard(Handle handle_init) :
+        handle(handle_init)
     {}
 
     /**
@@ -62,8 +64,8 @@ protected:
      * Will be called from derived class move constructors for moving the guarded handle in a safe way.
      * @param move
      */
-    Guard(Guard&& move) noexcept
-    : handle(move.handle)
+    Guard(Guard&& move) noexcept :
+        handle(move.handle)
     {
         move.handle = invalid_handle;
     }
@@ -91,27 +93,14 @@ public:
     }
 
 protected:
-    /**
-     * Wrapper for a handle closing function.
-     * Will close the handle and invalidates it.
-     * @tparam CLOSE          function pointer to a void(*)(Handle, const std::source_location&) closing function.
-     * @param source_location Optional source location object for throwing an exception in case of a close error.
-     */
-    template<auto CLOSE>
-    [[gnu::always_inline]] inline void close_on_destruction(
-        const std::source_location& source_location = std::source_location::current()
-    )
+    inline bool is_invalid()
     {
-        static_assert(
-            std::is_invocable_r_v<void, decltype(CLOSE), Handle, decltype(source_location)>,
-            "CLOSE template function ist not invocable."
-        );
+        return (handle == invalid_handle);
+    }
 
-        if (handle != invalid_handle)
-        {
-            CLOSE(handle, source_location);
-            handle = invalid_handle;
-        }
+    inline void invalidate()
+    {
+        handle = invalid_handle;
     }
 
 protected:
@@ -121,20 +110,20 @@ protected:
 /**
  * Specialized guard class for file descriptor based guards.
  */
-class GuardFileDescriptor : public Guard<FileDescriptor, file_descriptor_invalid>
+export class GuardFileDescriptor : public Guard<FileDescriptor, file_descriptor_invalid>
 {
 protected:
-    GuardFileDescriptor() = delete;
-    GuardFileDescriptor(const GuardFileDescriptor&) = delete;
+    GuardFileDescriptor()                                      = delete;
+    GuardFileDescriptor(const GuardFileDescriptor&)            = delete;
     GuardFileDescriptor& operator=(const GuardFileDescriptor&) = delete;
-    GuardFileDescriptor& operator=(GuardFileDescriptor&&) = delete;
+    GuardFileDescriptor& operator=(GuardFileDescriptor&&)      = delete;
 
-    explicit GuardFileDescriptor(FileDescriptor handle_init)
-    : Guard(handle_init)
+    explicit GuardFileDescriptor(FileDescriptor handle_init) :
+        Guard(handle_init)
     {}
 
-    GuardFileDescriptor(GuardFileDescriptor&& move) noexcept
-    : Guard(std::move(move))
+    GuardFileDescriptor(GuardFileDescriptor&& move) noexcept :
+        Guard(std::move(move))
     {}
 
 public:
@@ -166,40 +155,59 @@ protected:
     void close_on_destruction(const std::source_location& source_location = std::source_location::current());
 };
 
+void GuardFileDescriptor::close_on_destruction(const std::source_location& source_location)
+{
+    if (!is_invalid())
+    {
+        GuardFW::close(handle, source_location);
+        invalidate();
+    }
+}
+
 /**
  * Specialized guard class for FILE* based guards.
  */
-class GuardFileStream : public Guard<FILE*, nullptr>
+export class GuardFileStream : public Guard<FILE*, nullptr>
 {
 protected:
-    GuardFileStream() = delete;
-    GuardFileStream(const GuardFileStream&) = delete;
+    GuardFileStream()                                  = delete;
+    GuardFileStream(const GuardFileStream&)            = delete;
     GuardFileStream& operator=(const GuardFileStream&) = delete;
-    GuardFileStream& operator=(GuardFileStream&&) = delete;
+    GuardFileStream& operator=(GuardFileStream&&)      = delete;
 
-    explicit GuardFileStream(FILE* handle_init)
-    : Guard(handle_init)
+    explicit GuardFileStream(FILE* handle_init) :
+        Guard(handle_init)
     {}
 
-    GuardFileStream(GuardFileStream&& move) noexcept
-    : Guard(std::move(move))
+    GuardFileStream(GuardFileStream&& move) noexcept :
+        Guard(std::move(move))
     {}
+
+    void close_on_destruction(const std::source_location& source_location = std::source_location::current());
 
 public:
     virtual ~GuardFileStream() override = default;
 };
 
+void GuardFileStream::close_on_destruction(const std::source_location& source_location)
+{
+    if (!is_invalid())
+    {
+        GuardFW::fclose(handle, source_location);
+        invalidate();
+    }
+}
 
 /**
  * The wrapper TypeGuard<> is used in overloaded constructors to avoid ambiguity of similar argument types.
  * @tparam T Type of argument, for which ambiguity shall be avoided (e.g. int / unsigned).
  */
-template<typename T>
+export template<typename T>
 class TypeGuard
 {
 public:
-    explicit TypeGuard(T init)
-    : t(init)
+    explicit TypeGuard(T init) :
+        t(init)
     {}
 
     T operator()() const
@@ -212,5 +220,3 @@ private:
 };
 
 }  // namespace GuardFW
-
-#endif  // GUARDFW_GUARD_HPP

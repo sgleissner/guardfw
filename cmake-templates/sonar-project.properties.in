@@ -8,12 +8,12 @@ sonar.organization=sgleissner
 #sonar.projectName=@PROJECT_NAME@
 sonar.projectVersion=@PROJECT_VERSION@
 
-# Path is relative to the sonar-project.properties file. Replace "\" by "/" on Windows.
-sonar.sources=src/
-sonar.exclusions=src/tests/**/*
-sonar.tests=src/tests/
+# Path is relative to the sonar-project.properties file.
+sonar.sources=modules/
+#sonar.exclusions=src/tests/**/*
+sonar.tests=tests/
 
-# Encoding of the source code. Default is default system encoding
+# Encoding of the source code.
 sonar.sourceEncoding=UTF-8
 
 # allow C++23 (experimental)

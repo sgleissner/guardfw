@@ -1,5 +1,5 @@
 /**
- * Catch2 unit tests for guardfw/guard_file.hpp/cpp
+ * Catch2 unit tests for modules/guards/guard_file.cppm
  *
  * @author    Simon Gleissner <simon@gleissner.de>, http://guardfw.de
  * @copyright MIT license, see file LICENSE
@@ -8,7 +8,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <guardfw/guard_file.hpp>
+#include <fcntl.h>  // O_ macros
+
+import guardfw.guard_file;
 
 bool test_file(const char* filename)
 {

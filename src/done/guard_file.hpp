@@ -39,7 +39,7 @@ public:
      * Constructor wrapper for ::open() without mode parameter
      * @param pathname        see 'man 2 open'
      * @param flag            sse 'man 2 open'
-     * @param source_location calling location, used in case of an exceotion
+     * @param source_location calling location, used in case of an exception
      */
     explicit GuardFile(
         const char* pathname,  // see 'man 2 open'

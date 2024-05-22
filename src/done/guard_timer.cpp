@@ -23,12 +23,6 @@
 namespace GuardFW
 {
 
-/**
- * fix incompatibility between sys/timerfd.h and linux/timerfd.h by exporting a single constant value,
- * see guard_timer_constant.cpp for a description.
- */
-extern constinit unsigned long constant_TFD_IOC_SET_TICKS;
-
 GuardTimer::GuardTimer(int clockid, int flags)
 : GuardFileDescriptor(GuardFW::timerfd_create(clockid, flags))
 {}
@@ -51,7 +45,7 @@ uint64_t GuardTimer::get_expirations() const
 
 void GuardTimer::set_expirations(uint64_t expirations) const
 {
-    GuardFW::ioctl_noretval(handle, GuardFW::constant_TFD_IOC_SET_TICKS, &expirations);
+    GuardFW::ioctl_noretval(handle, GuardFW::tfd_ioc_set_ticks, &expirations);
 }
 
 void GuardTimer::set_time(int flags, const struct itimerspec& new_value, struct itimerspec& old_value) const
