@@ -1,4 +1,4 @@
-/**
+/*
  * Type traits collection for GuardFW.
  *
  * POSIX file descriptors are defined as 'int', but as this is ambiguous for reading,
@@ -10,11 +10,13 @@
  * @file
  */
 
-#pragma once
-#ifndef GUARDFW_TRAITS_HPP
-#define GUARDFW_TRAITS_HPP
+module;
 
+// TODO: move system modules, when possible & supported by cmake
 #include <string_view>
+
+export module guardfw.traits;
+
 
 namespace GuardFW
 {
@@ -28,8 +30,8 @@ namespace GuardFW
  * @tparam ARGS Arguments of function pointer, will be deducted and must not be provided
  * @return Undefined object of type R. This return type will be analysed with decltype().
  */
-template<typename RETURN_TYPE, typename... ARGS>
-static RETURN_TYPE return_type(RETURN_TYPE (*)(ARGS...));  // forward declaration only for decltype
+export template<typename RETURN_TYPE, typename... ARGS>
+RETURN_TYPE return_type(RETURN_TYPE (*)(ARGS...));  // forward declaration only for decltype
 
 /**
  * Helper function for return type deduction of function pointer (with C ellipsis).
@@ -40,13 +42,14 @@ static RETURN_TYPE return_type(RETURN_TYPE (*)(ARGS...));  // forward declaratio
  * @tparam ARGS Arguments of function pointer, will be deducted and must not be provided
  * @return Undefined object of type R. This return type will be analysed with decltype().
  */
-template<typename RETURN_TYPE, typename... ARGS>
-static RETURN_TYPE return_type(RETURN_TYPE (*)(ARGS..., ...));  // forward declaration only for decltype
+export template<typename RETURN_TYPE, typename... ARGS>
+RETURN_TYPE return_type(RETURN_TYPE (*)(ARGS..., ...));  // forward declaration only for decltype
+
 
 /**
  * Helper type for return type deduction of function pointer
  */
-template<auto FUNCTION_POINTER>
+export template<auto FUNCTION_POINTER>
 using ReturnType = decltype(return_type(FUNCTION_POINTER));
 
 
@@ -56,7 +59,7 @@ using ReturnType = decltype(return_type(FUNCTION_POINTER));
  * @tparam T Type of the non-function-pointer object.
  * @return   Always false.
  */
-template<typename T>
+export template<typename T>
 consteval bool is_function_pointer(T)
 {
     return false;
@@ -69,7 +72,7 @@ consteval bool is_function_pointer(T)
  * @tparam ARGS        Argument types of function pointer
  * @return             Always true.
  */
-template<class RETURN_TYPE, class... ARGS>
+export template<class RETURN_TYPE, class... ARGS>
 consteval bool is_function_pointer(RETURN_TYPE (*)(ARGS...))  // NOSONAR: function pointer allowed
 {
     return true;
@@ -82,7 +85,7 @@ consteval bool is_function_pointer(RETURN_TYPE (*)(ARGS...))  // NOSONAR: functi
  * @tparam ARGS        Argument types of function pointer
  * @return             Always true.
  */
-template<class RETURN_TYPE, class... ARGS>
+export template<class RETURN_TYPE, class... ARGS>
 consteval bool is_function_pointer(RETURN_TYPE (*)(ARGS...) noexcept)  // NOSONAR: function pointer allowed
 {
     return true;
@@ -95,7 +98,7 @@ consteval bool is_function_pointer(RETURN_TYPE (*)(ARGS...) noexcept)  // NOSONA
  * @tparam ARGS        Argument types of function pointer
  * @return             Always true.
  */
-template<class RETURN_TYPE, class... ARGS>
+export template<class RETURN_TYPE, class... ARGS>
 consteval bool is_function_pointer(RETURN_TYPE (*)(ARGS..., ...))  // NOSONAR: function pointer allowed
 {
     return true;
@@ -108,7 +111,7 @@ consteval bool is_function_pointer(RETURN_TYPE (*)(ARGS..., ...))  // NOSONAR: f
  * @tparam ARGS        Argument types of function pointer
  * @return             Always true.
  */
-template<class RETURN_TYPE, class... ARGS>
+export template<class RETURN_TYPE, class... ARGS>
 consteval bool is_function_pointer(RETURN_TYPE (*)(ARGS..., ...) noexcept)  // NOSONAR: function pointer allowed
 {
     return true;
@@ -116,13 +119,13 @@ consteval bool is_function_pointer(RETURN_TYPE (*)(ARGS..., ...) noexcept)  // N
 
 
 /**
- * Reflection helper for getting the name of the wrapped function.
+ * Reflection helper for getting the name of the wrappers function.
  *
  * @tparam WRAPPED_FUNCTION function pointer to POSIX/Linux API function
  * @return name of function
  */
-template<auto FUNCTION_POINTER>
-consteval static std::string_view name_of()
+export template<auto FUNCTION_POINTER>
+consteval std::string_view name_of()
 {
     static_assert(GuardFW::is_function_pointer(FUNCTION_POINTER), "name_of() works only with function pointers.");
 
@@ -139,6 +142,4 @@ consteval static std::string_view name_of()
     return std::string_view(start, static_cast<size_t>(end - start));
 }
 
-}  //  namespace GuardFW
-
-#endif  //GUARDFW_TRAITS_HPP
+}  // namespace GuardFW

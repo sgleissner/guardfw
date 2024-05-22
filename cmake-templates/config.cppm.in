@@ -1,0 +1,76 @@
+/**
+ * Auto-generated configuration settings.
+ *
+ * @file_generated_warning@
+ *
+ * @author    Simon Gleissner <simon@gleissner.de>
+ * @copyright MIT license, see file LICENSE
+ * @file
+ */
+
+module;
+
+#include <cstdint>      // uint16_t
+#include <cstddef>      // size_t
+#include <string_view>  // std::string_view
+
+export module guardfw.config;
+
+/**
+ * Get project version number from cmake configuration.
+ */
+// clang-format off
+#define VERSION_MAJOR    @PROJECT_VERSION_MAJOR@
+#define VERSION_MINOR    @PROJECT_VERSION_MINOR@
+#define VERSION_PATCH    @PROJECT_VERSION_PATCH@
+#define VERSION_TWEAK    @PROJECT_VERSION_TWEAK@
+#define VERSION          @PROJECT_VERSION@
+#define VERSION_ADDENDUM @VERSION_ADDENDUM@
+// clang-format on
+
+/**
+ * Stringify macro helper
+ */
+#define STRINGIFY(s) STRING(s)
+#define STRING(s) #s
+
+/**
+ * Unnamed namespace for static functions
+ */
+namespace
+{
+
+/**
+ * Compile-time helper to detect if a C-string is not empty.
+ * @tparam N     C array length (string with NUL byte).
+ * @param string C array (string with NUL byte).
+ * @return       false, if the string is empty, true if not.
+ */
+template<size_t N>  // NOLINTNEXTLINE(*-avoid-c-arrays): helper is templated consteval
+consteval bool not_empty_string(const char (&string)[N])
+{
+    return ((N > 1) && (string[0] != '\0'));  // more than NUL
+}
+
+}  // unnamed namespace
+
+
+/**
+ * Namespace for version number
+ */
+namespace GuardFW::config::version
+{
+
+export constexpr uint16_t major {VERSION_MAJOR};  /// project major version number
+export constexpr uint16_t minor {VERSION_MINOR};  /// project minor version number
+export constexpr uint16_t patch {VERSION_PATCH};  /// project patch version number
+export constexpr uint16_t tweak {VERSION_TWEAK};  /// project tweak version number
+
+export constexpr bool has_major {not_empty_string(STRINGIFY(VERSION_MAJOR))};  /// set if major version is defined
+export constexpr bool has_minor {not_empty_string(STRINGIFY(VERSION_MINOR))};  /// set if minor version is defined
+export constexpr bool has_patch {not_empty_string(STRINGIFY(VERSION_PATCH))};  /// set if patch version is defined
+export constexpr bool has_tweak {not_empty_string(STRINGIFY(VERSION_TWEAK))};  /// set if tweak version is defined
+
+export constexpr std::string_view semver {STRINGIFY(VERSION) STRINGIFY(VERSION_ADDENDUM)};  /// semantic version
+
+}  // namespace GuardFW::config::version

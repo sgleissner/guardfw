@@ -2,7 +2,7 @@
  * Exception for failed Linux API & POSIX calls.
  *
  * The WrapperError exception is based on std::system_error and contains both the name of the
- * failed wrapped API call and the position of the failed call (probably of the wrapper call).
+ * failed wrappers API call and the position of the failed call (probably of the wrapper call).
  *
  * @author    Simon Gleissner <simon@gleissner.de>, http://guardfw.de
  * @copyright MIT license, see file LICENSE

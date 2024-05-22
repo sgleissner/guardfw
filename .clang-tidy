@@ -1,0 +1,32 @@
+---
+# clang-tidy v17, 2024-01-24
+
+# option reference: https://clang.llvm.org/extra/clang-tidy/checks/list.html
+#
+
+Checks: '-*,
+  bugprone-*,
+  cert-*,
+  clang-analyzer-*,
+  concurrency-*,
+  cppcoreguidelines-*,
+  misc-*,
+  modernize-*,
+  performance-*,
+  portability-*,
+  readability-*,
+  -modernize-use-trailing-return-type,
+  -readability-braces-around-statements'
+WarningsAsErrors: ''
+HeaderFileExtensions: [ 'h','hpp' ]
+ImplementationFileExtensions: [ 'c','cpp','cppm' ]
+HeaderFilterRegex: ''    #?
+# AnalyzeTemporaryDtors: false #?
+FormatStyle: file  # only used when fixes are applied, which is not the case
+InheritParentConfig: false #?
+# User:                user  #?
+SystemHeaders: false
+# CheckOptions:
+#   some-check.SomeOption: 'some value'
+...
+

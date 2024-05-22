@@ -1,5 +1,5 @@
 /**
- * Catch2 unit tests for guardfw/wrapper.hpp
+ * Catch2 unit tests for guardfw/wrapper.cppm
  *
  * @author    Simon Gleissner <simon@gleissner.de>, http://guardfw.de
  * @copyright MIT license, see file LICENSE
@@ -9,10 +9,15 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 
+#include <cstdint>
+#include <source_location>
+#include <expected>
+
 #include <errno.h>
 
-#include <guardfw/wrapper.hpp>
-#include <guardfw/traits.hpp>
+import guardfw.wrapper;
+import guardfw.traits;
+
 
 static consteval std::source_location fixed_location()
 {
@@ -46,7 +51,7 @@ static int tester_repeat(int return_value, unsigned int error)
     static bool success = false;
     if (success == false)
     {
-        errno = static_cast<int>(error);
+        errno        = static_cast<int>(error);
         return_value = -1;
     }
     success = !success;  // for next try
@@ -57,7 +62,7 @@ static void* tester_void_ptr(void* return_value, unsigned int error)
 {
     if (error > 0)
     {
-        errno = static_cast<int>(error);
+        errno        = static_cast<int>(error);
         return_value = reinterpret_cast<void*>(static_cast<intptr_t>(-1));
     }
     return return_value;
@@ -72,7 +77,7 @@ static Demo* tester_demo_ptr(Demo* return_value, unsigned int error)
 {
     if (error > 0)
     {
-        errno = static_cast<int>(error);
+        errno        = static_cast<int>(error);
         return_value = reinterpret_cast<Demo*>(static_cast<intptr_t>(0));
     }
     return return_value;
@@ -96,7 +101,7 @@ TEST_CASE("wrapper: error, throws", "[wrapper]")
     what << "In function '" << fixloc.function_name()  // copied from ContextPosix<>::throw_function()
          << "' in file '" << fixloc.file_name()        // copied from ContextPosix<>::throw_function()
          << "' at line " << fixloc.line()              // copied from ContextPosix<>::throw_function()
-         << ": wrapped call to 'tester_std()' failed with error 22: Invalid argument";
+         << ": wrappers call to 'tester_std()' failed with error 22: Invalid argument";
 
     CHECK(std::is_same_v<int, GuardFW::ReturnType<GuardFW::ContextStd::wrapper<tester_std, int, int, unsigned int>>>);
     CHECK_THROWS_AS(GuardFW::ContextStd::wrapper<tester_std>(fixloc, 0, EINVAL), std::system_error);

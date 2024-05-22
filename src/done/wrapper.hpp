@@ -4,7 +4,7 @@
  * The templated wrapper function 'wrapper()' forwards its arguments to Linux API & POSIX functions.
  * When returning, the result is checked for errors and, if configured, an error handling is done.
  * It is e.g. configurable:
- * - where and how the wrapped API function returns the error indication and the error,
+ * - where and how the wrappers API function returns the error indication and the error,
  * - if errors ahall be thrown as exceptions or returned in std::expected<> as unexpected error,
  * - if success results shall be casted to other types (e.g. ssize_t -> size_t),
  * - if blockings (e.g. EAGAIN) shall be detected,
@@ -42,11 +42,11 @@ namespace GuardFW
 using Error = int;
 constexpr static Error no_error = 0;  ///< POSIX does not define a success error code.
 
-/// Describes how to test result value from wrapped function for error indication.
+/// Describes how to test result value from wrappers function for error indication.
 enum class ErrorIndication : uint8_t
 {
-    none,                ///< wrapped function is guaranteed to be always successful
-    ignore,              ///< wrapped function is forced to ignore errors (be careful, no success return value allowed)
+    none,                ///< wrappers function is guaranteed to be always successful
+    ignore,              ///< wrappers function is forced to ignore errors (be careful, no success return value allowed)
     lt0_direct,          ///< error if return value < 0, negative value is error code: e.g. for io_uring_enter()
     bt0_direct,          ///< error if return value > 0, positive value is error code: e.g. for pthread_cancel()
     eq0_errno,           ///< error if return value == 0, e.g. for fopen()
@@ -99,7 +99,7 @@ constexpr ErrorSpecial operator&(ErrorSpecial lv, ErrorSpecial rv)
 }
 
 /**
- * Concept for allowed return types of functions to be wrapped or wrapped functions after errors have been excluded.
+ * Concept for allowed return types of functions to be wrappers or wrappers functions after errors have been excluded.
  *
  * Valid for integers, pointers and void.
  *
@@ -109,7 +109,7 @@ template<typename RESULT>
 concept ResultConcept = std::is_pointer_v<RESULT> || std::is_integral_v<RESULT> || std::is_void_v<RESULT>;
 
 /**
- * Concept for allowed types of arguments of the wrapped function.
+ * Concept for allowed types of arguments of the wrappers function.
  *
  * Valid for pointers and integers.
  *
@@ -139,7 +139,7 @@ private:
     constexpr static bool errors_detectable {
         ((ERROR_INDICATION != ErrorIndication::none) && (ERROR_INDICATION != ErrorIndication::ignore))};
 
-    /// Flag indicates, that the wrapped function might return all errors directly.
+    /// Flag indicates, that the wrappers function might return all errors directly.
     constexpr static bool enable_direct_errors {(ERROR_REPORT == ErrorReport::direct)};
     static_assert(
         !enable_direct_errors || errors_detectable,
@@ -152,7 +152,7 @@ private:
         !ignore_soft_errors || errors_detectable, "soft errors can only be ignored, if errors are detectable."
     );
 
-    /// Flag indicates, that the wrapped function might return soft errors directly.
+    /// Flag indicates, that the wrappers function might return soft errors directly.
     constexpr static bool enable_soft_errors {(sizeof...(SOFT_ERRORS) != 0)};
     static_assert(
         !enable_soft_errors || errors_detectable,
@@ -166,21 +166,21 @@ private:
         !ignore_soft_errors || enable_soft_errors, "soft errors can only be ignored, if at least one is defined"
     );
 
-    /// Flag indicates, that the wrapped function might throw errors.
+    /// Flag indicates, that the wrappers function might throw errors.
     constexpr static bool enable_exception_errors {(ERROR_REPORT == ErrorReport::exception)};
     static_assert(
         !enable_exception_errors || errors_detectable,
         "error exceptions are not thrown, because errors can not be not detected."
     );
 
-    /// Flag indicates, that the wrapped function shall be prevented from getting blocked.
+    /// Flag indicates, that the wrappers function shall be prevented from getting blocked.
     constexpr static bool enable_nonblocking {(ERROR_SPECIAL & ErrorSpecial::nonblock) != ErrorSpecial::none};
     static_assert(
         !enable_nonblocking || errors_detectable,
         "blockings are not preventable, because errors can not be not detected."
     );
 
-    /// Flag indicates, that the wrapped function may be repeated for EINTR errors.
+    /// Flag indicates, that the wrappers function may be repeated for EINTR errors.
     constexpr static bool enable_repeat {(ERROR_SPECIAL & ErrorSpecial::eintr_repeats) != ErrorSpecial::none};
     static_assert(
         !enable_repeat || errors_detectable,
@@ -204,7 +204,7 @@ private:
     /**
      * Tests if a function result indicates an POSIX error.
      * @tparam FUNCTION_RESULT         Type of result, which might indicate an error.
-     * @param  wrapped_function_result Result of previously wrapped function, which might indicate an error.
+     * @param  wrapped_function_result Result of previously wrappers function, which might indicate an error.
      * @return                         true, if result indicates an error
      */
     template<ResultConcept FUNCTION_RESULT>
@@ -273,11 +273,11 @@ public:
      * - throw non-soft/non-direct errors
      * - return soft/direct errors
      *
-     * @tparam ERROR_INDICATION Defines how a wrapped posix function indicates an error.
+     * @tparam ERROR_INDICATION Defines how a wrappers posix function indicates an error.
      * @tparam ERROR_REPORT     Defines if and how an error shall be reported.
      * @tparam ERROR_SPECIAL    Flags to detect necessary repeats, prevented blockings or ignore errors.
      * @tparam SOFT_ERRORS      List of soft errors, which shall either be reported in the return value or be ignored.
-     * @tparam WRAPPED_FUNCTION Function pointer of POSIX or Linux API call, which shall be encapsulated/wrapped.
+     * @tparam WRAPPED_FUNCTION Function pointer of POSIX or Linux API call, which shall be encapsulated/wrappers.
      * @tparam SUCCESS_RESULT   Type to which the success result shall be casted to, standard is API call return type.
      * @tparam ARGS             Argument types of WRAPPED_FUNCTION arguments, automatically deducted.
      * @param source_location   Holds information about caller/calling position.
@@ -407,14 +407,14 @@ template<auto WRAPPED_FUNCTION, ResultConcept SUCCESS_RESULT, ArgumentConcept...
             || (((ERROR_INDICATION == ErrorIndication::none) || (ERROR_INDICATION == ErrorIndication::ignore))
                 && (ERROR_REPORT == ErrorReport::none) && (ERROR_SPECIAL == ErrorSpecial::none)
                 && (sizeof...(SOFT_ERRORS) == 0)),
-        "wrapped void functions can not have any error handling"
+        "wrappers void functions can not have any error handling"
     );
 
     constexpr bool result_is_void {
         !result_contains_value<SUCCESS_RESULT> && !result_contains_error && !result_contains_blocking};
     static_assert(
         result_is_void || !wrapped_function_returns_void,
-        "when wrapped function returns void, wrapper must also return void"
+        "when wrappers function returns void, wrapper must also return void"
     );
 
     // This rule is necessary, as we must not return a fake success value in case of ignored errors
@@ -423,12 +423,12 @@ template<auto WRAPPED_FUNCTION, ResultConcept SUCCESS_RESULT, ArgumentConcept...
         "Soft errors can only be ignored, if wrapper returns void in success case"
     );
 
-    if constexpr (wrapped_function_returns_void)  // wrapped function returns void, there is no return value to handle
+    if constexpr (wrapped_function_returns_void)  // wrappers function returns void, there is no return value to handle
     {
         WRAPPED_FUNCTION(args...);
         return;
     }
-    else if constexpr (!errors_detectable)  // wrapped function is always successful
+    else if constexpr (!errors_detectable)  // wrappers function is always successful
     {
         [[maybe_unused]] WrappedFunctionResult wrapped_function_result = WRAPPED_FUNCTION(args...);
         if constexpr (result_contains_value<SUCCESS_RESULT>)
@@ -463,7 +463,7 @@ template<auto WRAPPED_FUNCTION, ResultConcept SUCCESS_RESULT, ArgumentConcept...
 
         if constexpr (enable_repeat)  // do-while-loops can not be disabled by constexpr
             if (error == EINTR)       // test for interrupts by signal handlers
-                goto repeat_eintr;    // error EINTR will repeat the wrapped call
+                goto repeat_eintr;    // error EINTR will repeat the wrappers call
 
         if constexpr (result_contains_blocking)  // handle prevented blockings
         {
@@ -542,6 +542,11 @@ using ContextIgnoreErrors = Context<ErrorIndication::ignore, ErrorReport::none>;
 /// Pre-defined Context<> without any error handling for Posix functions, which are always successful
 using ContextNoErrors = Context<ErrorIndication::none, ErrorReport::none>;
 
+/// Pre-defined Context<> used for POSIX functions, which return pointers
+using ContextPtr = Context<ErrorIndication::eq0_errno>;
+
+/// Pre-defined Context<> used for POSIX functions, which return pointers and may report EINTR after signals (fopen)
+using ContextPtrRepeatEINTR = Context<ErrorIndication::eq0_errno, ErrorReport::exception, ErrorSpecial::eintr_repeats>;
 
 }  //  namespace GuardFW
 
