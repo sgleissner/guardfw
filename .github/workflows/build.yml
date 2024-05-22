@@ -9,8 +9,7 @@ on:
 jobs:
   build:
     name: Build
-    #    runs-on: ubuntu-22.04  # was: ubuntu-latest = 20.04 - sgl 2022-10-13
-    runs-on: ubuntu-24.04  # sgl 2024-05-24
+    runs-on: ubuntu-24.04
     env:
       SONAR_SCANNER_VERSION: 4.8.0.2856  # sgl 2023-01-16
       SONAR_SERVER_URL: "https://sonarcloud.io"
@@ -20,10 +19,13 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
-      - name: Install gcc 14
+      - name: Install GCC 14
         run: |
           sudo apt-get update
           sudo apt-get install gcc-14 g++-14
+      - name: Install Ninja
+        run: |
+          sudo apt-get install ninja-build
       - name: Install gcovr 6
         run: |
           pip install --break-system-packages gcovr
@@ -45,7 +47,7 @@ jobs:
           export CC=/usr/bin/gcc-14
           export CXX=/usr/bin/g++-14
           echo "### run cmake ###"
-          cmake -D COMPILE_COVERAGE=ON -S . -B unittests/64
+          cmake -G Ninja -D SONARQUBE=ON -S . -B unittests/64
           # cmake -D COMPILE_COVERAGE=ON -D COMPILE_32BIT=ON -S . -B unittests/32
           echo "### run cmake --build ###"
           cmake --build unittests/64/ -j 2
@@ -99,7 +101,7 @@ jobs:
           mkdir build
           export CC=/usr/bin/gcc-14
           export CXX=/usr/bin/g++-14
-          cmake -S . -B build
+          cmake -G Ninja -S . -B build
           build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build build/ --config Release
       - name: Run sonar-scanner
         env:
