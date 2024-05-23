@@ -125,7 +125,7 @@ export [[gnu::always_inline]] inline void close(
     FileDescriptor fd, const std::source_location& source_location = std::source_location::current()
 )
 {
-    ContextIgnoreEintr::wrapper<::close, void>(source_location, fd);
+    ContextIgnoreEINTR::wrapper<::close, void>(source_location, fd);
 }
 
 // sync

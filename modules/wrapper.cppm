@@ -375,7 +375,7 @@ Context<ERROR_INDICATION, ERROR_REPORT, ERROR_SPECIAL, SOFT_ERRORS...>::is_soft_
 // the description is in the struct above
 template<ErrorIndication ERROR_INDICATION, ErrorReport ERROR_REPORT, ErrorSpecial ERROR_SPECIAL, Error... SOFT_ERRORS>
 template<auto WRAPPED_FUNCTION, ResultConcept SUCCESS_RESULT, ArgumentConcept... ARGS>
-[[nodiscard, gnu::always_inline]] inline  // forced break for clang-format
+[[nodiscard, gnu::always_inline]] inline  // nodiscard is ignored for 'void'
     Context<ERROR_INDICATION, ERROR_REPORT, ERROR_SPECIAL, SOFT_ERRORS...>::WrapperResult<SUCCESS_RESULT>
     Context<ERROR_INDICATION, ERROR_REPORT, ERROR_SPECIAL, SOFT_ERRORS...>::wrapper(
         [[maybe_unused]] const std::source_location& source_location, ARGS... args
@@ -512,7 +512,7 @@ template<auto WRAPPED_FUNCTION, ResultConcept SUCCESS_RESULT, ArgumentConcept...
 export using ContextStd = Context<ErrorIndication::eqm1_errno>;
 
 /// Pre-defined Context<> used for close(), ignore EINTR, but throws all other errors
-export using ContextIgnoreEintr =
+export using ContextIgnoreEINTR =
     Context<ErrorIndication::eqm1_errno, ErrorReport::exception, ErrorSpecial::ignore_softerrors, EINTR>;
 
 /// Pre-defined Context<> used for functions, which may return EINTR after signals

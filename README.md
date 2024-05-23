@@ -47,7 +47,7 @@ inline static void close(
 	const std::source_location& source_location = std::source_location::current()
 )
 {
-	ContextIgnoreEintr::wrapper<::close, void>(source_location, fd);
+	ContextIgnoreEINTR::wrapper<::close, void>(source_location, fd);
 }
 ```
 
@@ -58,7 +58,7 @@ As you can see:
 - The `source_location` object reference shall be used in case of an exception. As the wrappers are inlined, hopefully
   its first access is moved into the exception part of the wrapper and shall not slow down the execution, even if it is
   only a fast pointer operation to a compiler-generated constant.
-- The context `ContextIgnoreEintr` is a typedef to the more generic context template
+- The context `ContextIgnoreEINTR` is a typedef to the more generic context template
   `Context<ErrorIndication::eqm1_errno, ErrorReport::exception, ErrorSpecial::ignore_softerrors, EINTR>`, which
   basically means:
   - `ErrorIndication::eqm1_errno`: The return value `-1` indicates an error, which is returned in `errno`.
