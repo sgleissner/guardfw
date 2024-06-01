@@ -520,6 +520,10 @@ export using ContextIgnoreEINTR =
 export using ContextRepeatEINTR =
     Context<ErrorIndication::eqm1_errno, ErrorReport::exception, ErrorSpecial::eintr_repeats>;
 
+/// Pre-defined Context<> used for io_uring_enter(), which may return EINTR after signals and EAGAIN & EBUSY
+export using ContextRepeatEINTRSoftEAGAINSoftEBUSY =
+    Context<ErrorIndication::eqm1_errno, ErrorReport::exception, ErrorSpecial::eintr_repeats, EAGAIN, EBUSY>;
+
 /// Pre-defined Context<> used for functions, which may return EINTR or EWOULDBLOCK/EAGAIN
 export using ContextNonblockRepeatEINTR =
     Context<ErrorIndication::eqm1_errno, ErrorReport::exception, ErrorSpecial::eintr_repeats | ErrorSpecial::nonblock>;
