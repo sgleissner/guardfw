@@ -17,8 +17,10 @@ export import guardfw.file_desciptor;
 export import guardfw.traits;
 export import guardfw.wrapper;
 
+export import guardfw.wrapped_epoll;
 export import guardfw.wrapped_eventfd;
 export import guardfw.wrapped_fcntl;
+export import guardfw.wrapped_io_uring;
 export import guardfw.wrapped_ioctl;
 export import guardfw.wrapped_mman;
 export import guardfw.wrapped_mqueue;

@@ -41,8 +41,10 @@ set(module_sources
         modules/file_descriptor.cppm
         modules/traits.cppm
         modules/wrapper.cppm
+        modules/wrappers/wrapped_epoll.cppm
         modules/wrappers/wrapped_eventfd.cppm
         modules/wrappers/wrapped_fcntl.cppm
+        modules/wrappers/wrapped_io_uring.cppm
         modules/wrappers/wrapped_ioctl.cppm
         modules/wrappers/wrapped_mman.cppm
         modules/wrappers/wrapped_mqueue.cppm
