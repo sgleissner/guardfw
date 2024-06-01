@@ -22,7 +22,7 @@ TEST_CASE("config: version numbers", "[config]")
 
     CHECK(GuardFW::config::version::major == 0);  // must be manually changed on each
     CHECK(GuardFW::config::version::minor == 0);  // version change in CMakeLists.txt
-    CHECK(GuardFW::config::version::patch == 4);
+    CHECK(GuardFW::config::version::patch == 5);
     CHECK(GuardFW::config::version::tweak == 0);
 
     CHECK(GuardFW::config::version::has_major == true);
