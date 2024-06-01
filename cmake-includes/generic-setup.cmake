@@ -47,57 +47,52 @@ execute_process(
         OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-# check latest tag, compare git tag with version number
-# TODO: to be deleted later
-#if ((GIT_TAG_RESULT EQUAL 0) AND (GIT_TAG_CHANGES_RESULT EQUAL 0))
-#    if(GIT_TAG_OUTPUT EQUAL PROJECT_VERSION)
-#        message("git tag version match")
-#    else()
-#        message("git tag version mismatch!")
-#    endif()
-#    if(GIT_TAG_OUTPUT EQUAL GIT_TAG_CHANGES_OUTPUT)
-#        message("git tag has no additional changes")
-#    else()
-#        message("git tag has additional changes!")
-#    endif()
-#else ()
-#    message("git tag unset!")
-#endif()
-
 # generate VERSION_ADDENDUM
 # TODO: eventually remove messages
 if (GIT_SHORT_HASH_RESULT EQUAL 0)
     # decide, if hash shall be appended
-    if ((NOT GIT_TAG_RESULT EQUAL 0) OR (NOT GIT_TAG_OUTPUT EQUAL GIT_TAG_CHANGES_OUTPUT))
-        # report short git hash
-        set(VERSION_ADDENDUM "-git${GIT_SHORT_HASH_OUTPUT}")
-        # report additional uncommitted changes
+    if ((NOT GIT_TAG_RESULT EQUAL 0) OR (NOT GIT_TAG_OUTPUT STREQUAL GIT_TAG_CHANGES_OUTPUT))
+        # Additional commits after latest tagged commit, report short git hash
+        string(TOUPPER "${GIT_SHORT_HASH_OUTPUT}" short_hash_uppercase)
+        set(VERSION_ADDENDUM "-git${short_hash_uppercase}")
+        # Additional uncommitted changes, report ".DIRTY"
         if ((GIT_DIRTY_RESULT EQUAL 0) AND (NOT GIT_DIRTY_OUTPUT EQUAL 0))
             set(VERSION_ADDENDUM "${VERSION_ADDENDUM}.DIRTY")
         endif ()
-        # report git tag version mismatch compared to project version
-        if ((NOT GIT_TAG_RESULT EQUAL 0) OR (NOT GIT_TAG_OUTPUT EQUAL PROJECT_VERSION))
+        # git tag != cmake version, report ".TAGDIRTY"
+        if ((NOT GIT_TAG_RESULT EQUAL 0) OR
+        ((NOT GIT_TAG_OUTPUT STREQUAL PROJECT_VERSION) AND
+        (NOT GIT_TAG_OUTPUT STREQUAL "v${PROJECT_VERSION}") AND
+        (NOT GIT_TAG_OUTPUT STREQUAL "V${PROJECT_VERSION}")))
             set(VERSION_ADDENDUM "${VERSION_ADDENDUM}.TAGDIRTY")
         endif ()
         # git version not correctly tagged, shall not be released
         set(RELEASABLE_GIT false)
         # debug output
         if (NOT GIT_TAG_RESULT EQUAL 0)
-            message("git tag unset!") # checked
+            message("git tag unset!") # checked   # TODO: to be removed
         else ()
-            message("git tag version unclean")
+            message("git tag version unclean") # checked   # TODO: to be removed
         endif ()
     else ()
-        # correctly tagged, may be released
-        set(VERSION_ADDENDUM "")
-        set(RELEASABLE_GIT true)
-        message("git tag version clean")
+        if ((GIT_DIRTY_RESULT EQUAL 0) AND (NOT GIT_DIRTY_OUTPUT EQUAL 0))
+            # correctly tagged, but uncommitted changes
+            set(VERSION_ADDENDUM "${VERSION_ADDENDUM}.DIRTY")
+            set(RELEASABLE_GIT false)
+            message("git tag version clean, but uncommitted changes") # checked   # TODO: to be removed
+        else ()
+            # correctly tagged, may be released
+            set(VERSION_ADDENDUM "")
+            set(RELEASABLE_GIT true)
+            message("git tag version clean")  # TODO: to be removed
+        endif ()
     endif ()
 else ()
     # no git, can not be released
     set(VERSION_ADDENDUM "")
     set(RELEASABLE_GIT false)
-    message("git not used")
+    message("git not used")  # TODO: to be removed
 endif ()
 
-message("${VERSION_ADDENDUM}")  # TODO: to be removed
+message("VERSION_ADDENDUM=${VERSION_ADDENDUM}")  # TODO: to be removed
+message("RELEASABLE_GIT=${RELEASABLE_GIT}")

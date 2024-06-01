@@ -43,17 +43,17 @@ jobs:
         run: |
           echo "### setup ###"
           PRJROOT=$(pwd)
-          mkdir -p unittests/64
-          mkdir -p unittests/reports
+          mkdir -p work/unittests/64
+          mkdir -p work/unittests/reports
           export CC=/usr/bin/gcc-14
           export CXX=/usr/bin/g++-14
           echo "### run cmake ###"
-          cmake -G Ninja -D SONARQUBE=ON -S . -B unittests/64
-          # cmake -D COMPILE_COVERAGE=ON -D COMPILE_32BIT=ON -S . -B unittests/32
+          cmake -G Ninja -D SONARQUBE=ON -S . -B work/unittests/64
+          # cmake -D COMPILE_COVERAGE=ON -D COMPILE_32BIT=ON -S . -B work/unittests/32
           echo "### run cmake --build ###"
-          cmake --build unittests/64/ -j 2
-          # cmake --build unittests/32/ -j 2
-          pushd unittests/64
+          cmake --build work/unittests/64/ -j 2
+          # cmake --build work/unittests/32/ -j 2
+          pushd work/unittests/64
           echo "### run unit tests ###"
           ./guardfw-tests --reporter console::out=-::colour-mode=ansi --reporter SonarQube::out=../reports/unittest-x86_64.xml
           echo "### generate gcov files ###"
@@ -63,14 +63,14 @@ jobs:
           gcovr -g -k --root ../.. --sonarqube ../reports/coverage-x86_64.xml --print-summary --gcov-ignore-parse-errors=negative_hits.warn_once_per_file
           popd
           # ls -alR .
-          # pushd unittests/32
+          # pushd work/unittests/32
           # ./concurrentfw-tests --reporter console::out=-::colour-mode=ansi --reporter SonarQube::out=../reports/unittest-x86.xml
           # gcovr -r ../.. --sonarqube ../reports/coverage-x86.xml
           # popd
           # pwd
           # ls -al
-          # ls -al unittests/32
-          # ls -al unittests/reports
+          # ls -al work/unittests/32
+          # ls -al work/unittests/reports
       - name: Set up JDK 11
         uses: actions/setup-java@v3
         with:
@@ -99,11 +99,11 @@ jobs:
           echo "$HOME/.sonar/build-wrapper-linux-x86" >> $GITHUB_PATH
       - name: Run Sonar build-wrapper
         run: |
-          mkdir build
+          mkdir -p work/build
           export CC=/usr/bin/gcc-14
           export CXX=/usr/bin/g++-14
-          cmake -G Ninja -S . -B build
-          build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build build/ --config Release
+          cmake -G Ninja -S . -B work/build
+          build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build work/build/ --config Release
       - name: Run sonar-scanner
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

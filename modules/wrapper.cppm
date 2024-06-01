@@ -21,12 +21,13 @@ module;
 
 #include <errno.h>  // EAGAIN/EWOULDBLOCK
 
+#include <bit>
 #include <cstdint>
 #include <expected>
 #include <optional>
-#include <type_traits>
 #include <source_location>
-#include <bit>
+#include <system_error>  // std::system_error, std::system_category
+#include <type_traits>
 
 export module guardfw.wrapper;
 
@@ -375,7 +376,7 @@ Context<ERROR_INDICATION, ERROR_REPORT, ERROR_SPECIAL, SOFT_ERRORS...>::is_soft_
 // the description is in the struct above
 template<ErrorIndication ERROR_INDICATION, ErrorReport ERROR_REPORT, ErrorSpecial ERROR_SPECIAL, Error... SOFT_ERRORS>
 template<auto WRAPPED_FUNCTION, ResultConcept SUCCESS_RESULT, ArgumentConcept... ARGS>
-[[nodiscard, gnu::always_inline]] inline  // forced break for clang-format
+[[nodiscard, gnu::always_inline]] inline  // nodiscard is ignored for 'void'
     Context<ERROR_INDICATION, ERROR_REPORT, ERROR_SPECIAL, SOFT_ERRORS...>::WrapperResult<SUCCESS_RESULT>
     Context<ERROR_INDICATION, ERROR_REPORT, ERROR_SPECIAL, SOFT_ERRORS...>::wrapper(
         [[maybe_unused]] const std::source_location& source_location, ARGS... args
@@ -491,11 +492,11 @@ template<auto WRAPPED_FUNCTION, ResultConcept SUCCESS_RESULT, ArgumentConcept...
             else  // NOT constexpr
             {
                 if constexpr (enable_exception_errors)
-                    throw WrapperError(error, name_of<WRAPPED_FUNCTION>(), source_location);
+                    throw_system_error(error, name_of<WRAPPED_FUNCTION>(), source_location);
             }  // may leave scope for direct errors
         }  // mey leave scope for soft or direct errors
         else if constexpr (enable_exception_errors)  // handle instant error exceptions
-            throw WrapperError(error, name_of<WRAPPED_FUNCTION>(), source_location);
+            throw_system_error(error, name_of<WRAPPED_FUNCTION>(), source_location);
 
         if constexpr (result_contains_error)  // handle soft or direct errors
         {
@@ -512,7 +513,7 @@ template<auto WRAPPED_FUNCTION, ResultConcept SUCCESS_RESULT, ArgumentConcept...
 export using ContextStd = Context<ErrorIndication::eqm1_errno>;
 
 /// Pre-defined Context<> used for close(), ignore EINTR, but throws all other errors
-export using ContextIgnoreEintr =
+export using ContextIgnoreEINTR =
     Context<ErrorIndication::eqm1_errno, ErrorReport::exception, ErrorSpecial::ignore_softerrors, EINTR>;
 
 /// Pre-defined Context<> used for functions, which may return EINTR after signals
