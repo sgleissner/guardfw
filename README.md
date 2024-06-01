@@ -21,12 +21,13 @@ GuardFW is a framework for using POSIX and other Linux API system calls in a sec
   goal is to hide the complex template wrapper. It shall use the same or a similar name with the same arguments, but in
   the namespace GuardFW::. Using the wrappers instead of direct API calls allows the programmer to concentrate on the
   functionality. Pointers to single objects may be exchanged against references, if they are forbidden to be nullptr.
-- Additionally, logical connected functions are combined in Guards, which prevent some misusage. Guard constructors open
-  kernel objects, destructors close them, member functions use them.
+  ~~- Additionally, logical connected functions are combined in Guards, which prevent some misusage. Guard constructors
+  open
+  kernel objects, destructors close them, member functions use them.~~ This functionality has been moved to AsyncFW,
+  as the guards now contain epoll and io_uring callbacks.
 - This is a Linux-only library. It is neither portable to other operating systems, nor is this planned.
-- GuardFW requires C++23 (currently not yet released as ISO standard) and will switch from GCC-12 to GCC-13 (as soon
-  GitHub runners do support it, which may be after its official release in spring 2023). Sorry for that. Unit tests are
-  done with Catch2.
+- GuardFW requires C++23 and GCC-14 (due to C++ modules). Sorry for that.
+- Unit tests are done with Catch2.
 
 ## Some Examples
 

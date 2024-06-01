@@ -54,19 +54,12 @@ set(module_sources
         modules/wrappers/wrapped_timerfd.cppm
         modules/wrappers/wrapped_timerfd_constant.cppm
         modules/wrappers/wrapped_unistd.cppm
-        modules/guards/guard.cppm
-        modules/guards/guard_event.cppm
-        modules/guards/guard_file.cppm
-        modules/guards/guard_message.cppm
-        modules/guards/guard_signal.cppm
-        modules/guards/guard_timer.cppm
         ${CMAKE_BINARY_DIR}/generated/config.cppm
 )
 
 # unit test files
 set(test_sources
         tests/test_config.cpp
-        tests/test_file.cpp
         tests/test_wrapper.cpp
 )
 
