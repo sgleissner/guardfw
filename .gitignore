@@ -1,2 +1,10 @@
+# IDE settings
 .idea
+
+# common work folders
 cmake-build-*
+work
+CMakeFiles
+
+# generated SonarQube config, will be placed by cmake in root directory
+sonar-project.properties

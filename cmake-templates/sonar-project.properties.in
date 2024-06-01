@@ -20,9 +20,9 @@ sonar.sourceEncoding=UTF-8
 sonar.cfamily.cpp23.enabled=true
 
 # unit test report path
-sonar.testExecutionReportPaths=unittests/reports/unittest-x86_64.xml
+sonar.testExecutionReportPaths=work/unittests/reports/unittest-x86_64.xml
 
 # gcov usage
 # https://community.sonarsource.com/t/how-to-make-sonarqube-see-gcovr-cobertura-reports/56270/2
 # https://github.com/sonarsource-cfamily-examples/linux-cmake-gcovr-gh-actions-sc
-sonar.coverageReportPaths=unittests/reports/coverage-x86_64.xml
+sonar.coverageReportPaths=work/unittests/reports/coverage-x86_64.xml
