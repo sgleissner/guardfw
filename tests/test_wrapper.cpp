@@ -318,7 +318,7 @@ TEST_CASE("wrapper: close() test, throws, EINTR ignored, return void", "[wrapper
 {
     CHECK(std::is_void_v<
           GuardFW::ReturnType<(GuardFW::ContextIgnoreEINTR::wrapper<tester_std, void, int, unsigned int>)>>);
-    CHECK_NOTHROW(GuardFW::ContextIgnoreEintr::wrapper<tester_std, void>(fixloc, 0, 0));
+    CHECK_NOTHROW(GuardFW::ContextIgnoreEINTR::wrapper<tester_std, void>(fixloc, 0, 0));
     CHECK_NOTHROW(GuardFW::ContextIgnoreEINTR::wrapper<tester_std, void>(fixloc, 0, EINTR));
-    CHECK_THROWS(GuardFW::ContextIgnoreEintr::wrapper<tester_std, void>(fixloc, 0, EINVAL));
+    CHECK_THROWS(GuardFW::ContextIgnoreEINTR::wrapper<tester_std, void>(fixloc, 0, EINVAL));
 }
