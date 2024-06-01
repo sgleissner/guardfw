@@ -20,7 +20,6 @@ module;
 #include <sstream>          // std::ostringstream
 #include <string>           // std::string
 #include <string_view>      // std::string_view
-#include <system_error>     // std::system_error, std::system_category
 #include <typeinfo>         // std::type_info
 
 #include <cxxabi.h>  // __cxa_current_exception_type(), __cxa_demangle
@@ -70,7 +69,7 @@ export [[noreturn]] void terminate_handler() noexcept
     constexpr size_t output_size {1024};  // 1 kB ought to be enough for anybody ;-)
     // NOLINTNEXTLINE(*-avoid-c-arrays): C-array granted here
     char output[output_size];  // we are in a terminate handler and don't want to
-    int result = 0;            // provoke further problems e.g. with stringstream oom
+    int result = 0;
 
     try         // We already know that an exception has been thrown,
     {           // but we don't know which exception it is.
@@ -99,35 +98,23 @@ export [[noreturn]] void terminate_handler() noexcept
     error_and_abort(&output[0]);  // [[noreturn]]
 }
 
-
-export class WrapperError : public std::system_error
-{
-public:
-    WrapperError(int error, const std::string_view& wrapped_function_name, const std::source_location& location);
-
-private:
-    static std::string build_what(
-        int error, const std::string_view& wrapped_function_name, const std::source_location& location
-    );
-};
-
-WrapperError::WrapperError(
-    int error, const std::string_view& wrapped_function_name, const std::source_location& location
-) :
-    system_error(error, std::system_category(), build_what(error, wrapped_function_name, location))
-{}
-
-std::string WrapperError::build_what(
-    int error, const std::string_view& wrapped_function_name, const std::source_location& location
+export [[noreturn]] void throw_system_error(
+    int error,
+    const std::string_view& wrapped_function_name,
+    const std::source_location& source_location = std::source_location::current()
 )
 {
-    return std::format(
-        "in function '{}' in file '{}' at line {}: wrapped call to '{}()' failed with error {}",
-        location.function_name(),
-        location.file_name(),
-        location.line(),
-        wrapped_function_name,
-        error
+    throw std::system_error(
+        error,
+        std::system_category(),
+        std::format(
+            "in function '{}' in file '{}' at line {}: wrapped call to '{}()' failed with error {}",
+            source_location.function_name(),
+            source_location.file_name(),
+            source_location.line(),
+            wrapped_function_name,
+            error
+        )
     );
 }
 

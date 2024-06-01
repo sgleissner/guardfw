@@ -21,12 +21,13 @@ module;
 
 #include <errno.h>  // EAGAIN/EWOULDBLOCK
 
+#include <bit>
 #include <cstdint>
 #include <expected>
 #include <optional>
-#include <type_traits>
 #include <source_location>
-#include <bit>
+#include <system_error>  // std::system_error, std::system_category
+#include <type_traits>
 
 export module guardfw.wrapper;
 
@@ -491,11 +492,11 @@ template<auto WRAPPED_FUNCTION, ResultConcept SUCCESS_RESULT, ArgumentConcept...
             else  // NOT constexpr
             {
                 if constexpr (enable_exception_errors)
-                    throw WrapperError(error, name_of<WRAPPED_FUNCTION>(), source_location);
+                    throw_system_error(error, name_of<WRAPPED_FUNCTION>(), source_location);
             }  // may leave scope for direct errors
         }  // mey leave scope for soft or direct errors
         else if constexpr (enable_exception_errors)  // handle instant error exceptions
-            throw WrapperError(error, name_of<WRAPPED_FUNCTION>(), source_location);
+            throw_system_error(error, name_of<WRAPPED_FUNCTION>(), source_location);
 
         if constexpr (result_contains_error)  // handle soft or direct errors
         {
