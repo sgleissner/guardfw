@@ -61,16 +61,16 @@ consteval bool not_empty_string(const char (&string)[N])
 namespace GuardFW::config::version
 {
 
-export constexpr uint16_t major {VERSION_MAJOR};  /// project major version number
-export constexpr uint16_t minor {VERSION_MINOR};  /// project minor version number
-export constexpr uint16_t patch {VERSION_PATCH};  /// project patch version number
-export constexpr uint16_t tweak {VERSION_TWEAK};  /// project tweak version number
+export constexpr uint16_t major {VERSION_MAJOR};  ///< project major version number
+export constexpr uint16_t minor {VERSION_MINOR};  ///< project minor version number
+export constexpr uint16_t patch {VERSION_PATCH};  ///< project patch version number
+export constexpr uint16_t tweak {VERSION_TWEAK};  ///< project tweak version number
 
-export constexpr bool has_major {not_empty_string(STRINGIFY(VERSION_MAJOR))};  /// set if major version is defined
-export constexpr bool has_minor {not_empty_string(STRINGIFY(VERSION_MINOR))};  /// set if minor version is defined
-export constexpr bool has_patch {not_empty_string(STRINGIFY(VERSION_PATCH))};  /// set if patch version is defined
-export constexpr bool has_tweak {not_empty_string(STRINGIFY(VERSION_TWEAK))};  /// set if tweak version is defined
+export constexpr bool has_major {not_empty_string(STRINGIFY(VERSION_MAJOR))};  ///< set if major version is defined
+export constexpr bool has_minor {not_empty_string(STRINGIFY(VERSION_MINOR))};  ///< set if minor version is defined
+export constexpr bool has_patch {not_empty_string(STRINGIFY(VERSION_PATCH))};  ///< set if patch version is defined
+export constexpr bool has_tweak {not_empty_string(STRINGIFY(VERSION_TWEAK))};  ///< set if tweak version is defined
 
-export constexpr std::string_view semver {STRINGIFY(VERSION) STRINGIFY(VERSION_ADDENDUM)};  /// semantic version
+export constexpr std::string_view semver {STRINGIFY(VERSION) STRINGIFY(VERSION_ADDENDUM)};  ///< semantic version
 
 }  // namespace GuardFW::config::version
