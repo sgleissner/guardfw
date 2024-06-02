@@ -65,13 +65,6 @@ set(test_sources
         tests/test_wrapper.cpp
 )
 
-# configure_file(cmake-templates/${PROJECT_NAME}.pc.in ${PROJECT_NAME}.pc @ONLY)
-# configure_file(cmake-templates/obs-rpm.spec.in ${CMAKE_SOURCE_DIR}/openbuildservice/obs-rpm.spec @ONLY)
-
-# install(FILES ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.pc
-#         DESTINATION ${CMAKE_INSTALL_DATADIR}/pkgconfig
-# )
-
 include(GNUInstallDirs)                          # predefined Filesystem Hierachy Standard folders
 include(cmake-includes/generic-setup.cmake)      # generic project setup & helpers
 include(cmake-includes/generic-sonarqube.cmake)  # generic SonarQube support
