@@ -303,29 +303,31 @@ template<ResultConcept FUNCTION_RESULT>
     FUNCTION_RESULT wrapped_function_result
 )
 {
-    constexpr FUNCTION_RESULT zero {};  // is integer (0) or pointer (nullptr)
+    using Comparison        = std::conditional_t<std::is_pointer_v<FUNCTION_RESULT>, intptr_t, FUNCTION_RESULT>;
+    const Comparison result = std::bit_cast<Comparison>(wrapped_function_result);
+
+    static_assert(
+        (ERROR_INDICATION != ErrorIndication::lt0_direct     // result is expected to be comparable
+         && ERROR_INDICATION != ErrorIndication::eqm1_errno  // with negative value
+         && ERROR_INDICATION != ErrorIndication::eqm1_errno_changed)
+            || std::is_signed_v<Comparison>,
+        "negative comparison is expected, but not possible"
+    );
 
     if constexpr (ERROR_INDICATION == ErrorIndication::eq0_errno)
-        return (wrapped_function_result == zero);
+        return (result == 0);
     else if constexpr (ERROR_INDICATION == ErrorIndication::lt0_direct)
-        return (wrapped_function_result < zero);
+        return (result < 0);
     else if constexpr (ERROR_INDICATION == ErrorIndication::bt0_direct)
-        return (wrapped_function_result > zero);
+        return (result > 0);
     else if constexpr (ERROR_INDICATION == ErrorIndication::eq0_errno_changed)
-        return (wrapped_function_result == zero) && (errno != no_error);
+        return (result == 0) && (errno != no_error);
     else if constexpr (ERROR_INDICATION == ErrorIndication::eqm1_errno)
-        if constexpr (std::is_pointer_v<FUNCTION_RESULT>)
-            return (wrapped_function_result == std::bit_cast<FUNCTION_RESULT>(static_cast<intptr_t>(-1)));
-        else  // constexpr: FUNCTION_RESULT is integer
-            return (wrapped_function_result == static_cast<FUNCTION_RESULT>(-1));
+        return (result == -1);
     else if constexpr (ERROR_INDICATION == ErrorIndication::eqm1_errno_changed)
-        if constexpr (std::is_pointer_v<FUNCTION_RESULT>)
-            return (wrapped_function_result == std::bit_cast<FUNCTION_RESULT>(static_cast<intptr_t>(-1)))
-                   && (errno != no_error);
-        else  // constexpr: FUNCTION_RESULT is integer
-            return (wrapped_function_result == static_cast<FUNCTION_RESULT>(-1)) && (errno != no_error);
-    else               // constexpr, shall not be reached unless an ErrorIndication has been forgotten
-        return false;  // in this case, we report always an error
+        return (result == -1) && (errno != no_error);
+    else  // constexpr
+        static_assert(false, "unhandled ErrorIndication");
 }
 
 
