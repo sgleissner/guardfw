@@ -300,7 +300,7 @@ public:
 template<ErrorIndication ERROR_INDICATION, ErrorReport ERROR_REPORT, ErrorSpecial ERROR_SPECIAL, Error... SOFT_ERRORS>
 template<ResultConcept FUNCTION_RESULT>
 [[gnu::always_inline]] inline bool Context<ERROR_INDICATION, ERROR_REPORT, ERROR_SPECIAL, SOFT_ERRORS...>::is_error(
-    FUNCTION_RESULT wrapped_function_result
+    const FUNCTION_RESULT wrapped_function_result
 )
 {
     using Comparison        = std::conditional_t<std::is_pointer_v<FUNCTION_RESULT>, intptr_t, FUNCTION_RESULT>;
@@ -335,7 +335,7 @@ template<ResultConcept FUNCTION_RESULT>
 template<ErrorIndication ERROR_INDICATION, ErrorReport ERROR_REPORT, ErrorSpecial ERROR_SPECIAL, Error... SOFT_ERRORS>
 template<ResultConcept FUNCTION_RESULT>
 [[gnu::always_inline]] inline Error Context<ERROR_INDICATION, ERROR_REPORT, ERROR_SPECIAL, SOFT_ERRORS...>::get_error(
-    FUNCTION_RESULT wrapped_function_result
+    const FUNCTION_RESULT wrapped_function_result
 )
 {
     if constexpr (ERROR_INDICATION == ErrorIndication::lt0_direct)  // error is in negative return value
@@ -355,7 +355,7 @@ template<ResultConcept FUNCTION_RESULT>
 // the description is in the struct above
 template<ErrorIndication ERROR_INDICATION, ErrorReport ERROR_REPORT, ErrorSpecial ERROR_SPECIAL, Error... SOFT_ERRORS>
 [[gnu::always_inline]] inline bool
-Context<ERROR_INDICATION, ERROR_REPORT, ERROR_SPECIAL, SOFT_ERRORS...>::is_soft_error(Error compare)
+Context<ERROR_INDICATION, ERROR_REPORT, ERROR_SPECIAL, SOFT_ERRORS...>::is_soft_error(const Error compare)
 {
     if constexpr (sizeof...(SOFT_ERRORS) == 0)
     {
