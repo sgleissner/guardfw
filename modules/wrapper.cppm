@@ -304,7 +304,7 @@ template<ResultConcept FUNCTION_RESULT>
 )
 {
     using Comparison        = std::conditional_t<std::is_pointer_v<FUNCTION_RESULT>, intptr_t, FUNCTION_RESULT>;
-    const Comparison result = std::bit_cast<Comparison>(wrapped_function_result);
+    const Comparison result = std::bit_cast<Comparison>(wrapped_function_result);  // is expected to be a no-op
 
     static_assert(
         (ERROR_INDICATION != ErrorIndication::lt0_direct     // result is expected to be comparable
