@@ -30,6 +30,7 @@ add_compile_options(
         -Wconversion
         -Wno-terminate # allows destructors to throw and abort the application
         -Werror
+        -Wno-error=deprecated-declarations # using attribute [[deprecated]] is not an error
         -O3
         -fmodules-ts # modules are currently not explicitly enabled in gcc with -std=c++20
 )
@@ -63,6 +64,8 @@ set(module_sources
 set(test_sources
         tests/test_config.cpp
         tests/test_wrapper.cpp
+        tests/test_wrapped_io_uring.cpp
+        tests/test_wrapped_mman.cpp
 )
 
 include(GNUInstallDirs)                          # predefined Filesystem Hierachy Standard folders
