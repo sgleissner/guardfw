@@ -1,3 +1,6 @@
 - use CPack for package RPM files
 - embed in openSUSE Build Service
 - more unit tests
+- use [[gnu::nonnull]], [[gnu::returns_nonnull]] for arguments, where applicable
+- use references, where applicable
+- use std::optional and references for optional null pointer values, where applicable
