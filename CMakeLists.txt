@@ -8,7 +8,7 @@ set(CMAKE_CXX_COMPILER /usr/bin/g++-14 CACHE PATH "" FORCE)
 # project settings
 
 project(guardfw        # = CMAKE_PROJECT_NAME
-        VERSION 0.0.5
+        VERSION 0.0.6
         DESCRIPTION "Templated C++ wrapper around Linux API functions for proper error handling" # without trailing '.'
         HOMEPAGE_URL "http://guardfw.de"
         LANGUAGES CXX
