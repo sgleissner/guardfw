@@ -19,6 +19,10 @@ sonar.sourceEncoding=UTF-8
 # see: https://community.sonarsource.com/t/c-23-support-sonar-scanner-unsupported-value-of-cplusplus-macro/76294/4
 sonar.cfamily.cpp23.enabled=true
 
+# allow C++20 Modules (experimental)
+# see: https://community.sonarsource.com/t/current-status-of-c-20-modules/115756/5
+sonar.cfamily.enableModules=true
+
 # unit test report path
 sonar.testExecutionReportPaths=work/unittests/reports/unittest-x86_64.xml
 
