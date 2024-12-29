@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.28) # v3.28 supports C++20 modules
 
 # force a compiler with enhanced C++ module support
 
-set(CMAKE_C_COMPILER /usr/bin/gcc-14 CACHE PATH "" FORCE)
-set(CMAKE_CXX_COMPILER /usr/bin/g++-14 CACHE PATH "" FORCE)
+#set(CMAKE_C_COMPILER /usr/bin/gcc-14 CACHE PATH "" FORCE)
+#set(CMAKE_CXX_COMPILER /usr/bin/g++-14 CACHE PATH "" FORCE)
 
 # project settings
 

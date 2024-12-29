@@ -28,9 +28,10 @@ jobs:
       - name: Install Ninja
         run: |
           sudo apt-get install ninja-build
-      - name: Install gcovr 6
+      - name: Install gcovr
         run: |
           pip install --break-system-packages gcovr
+          gcovr --version
       - name: Install latest Catch2 from git repository
         run: |
           cd $HOME
@@ -49,7 +50,7 @@ jobs:
           export CC=/usr/bin/gcc-14
           export CXX=/usr/bin/g++-14
           echo "### run cmake ###"
-          cmake -G Ninja -D SONARQUBE=ON -S . -B work/unittests/64
+          cmake -D CMAKE_VERBOSE_MAKEFILE=ON -G Ninja -D SONARQUBE=ON -S . -B work/unittests/64
           # cmake -D COMPILE_COVERAGE=ON -D COMPILE_32BIT=ON -S . -B work/unittests/32
           echo "### run cmake --build ###"
           cmake --build work/unittests/64/ -j 2
@@ -58,8 +59,9 @@ jobs:
           echo "### run unit tests ###"
           ./guardfw-tests --reporter console::out=-::colour-mode=ansi --reporter SonarQube::out=../reports/unittest-x86_64.xml
           echo "### generate gcov files ###"
+          find . -name "*.gcno" -exec ls -al \{\} \;
           find . -name "*.gcno" -exec xargs gcov-14 -b -l -p -c \{\} \;
-          # find . -name "*.gcno" | xargs gcov-14 -b -l -p -c
+          find . -name "*.gcov" -exec ls -al \{\} \;
           echo "### run gcovr ###"          
           gcovr -g -k --root ../.. --sonarqube ../reports/coverage-x86_64.xml --print-summary --gcov-ignore-parse-errors=negative_hits.warn_once_per_file
           popd
