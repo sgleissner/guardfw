@@ -16,7 +16,10 @@ Checks: '-*,
   portability-*,
   readability-*,
   -modernize-use-trailing-return-type,
-  -readability-braces-around-statements'
+  -readability-braces-around-statements,
+  -cppcoreguidelines-avoid-do-while,
+  -misc-include-cleaner,
+  -readability-redundant-member-init'
 WarningsAsErrors: ''
 HeaderFileExtensions: [ 'h','hpp' ]
 ImplementationFileExtensions: [ 'c','cpp','cppm' ]
@@ -26,7 +29,7 @@ FormatStyle: file  # only used when fixes are applied, which is not the case
 InheritParentConfig: false #?
 # User:                user  #?
 SystemHeaders: false
-# CheckOptions:
-#   some-check.SomeOption: 'some value'
+CheckOptions:
+  modernize-use-override.AllowOverrideAndFinal: true
 ...
 
