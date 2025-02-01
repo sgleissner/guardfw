@@ -12,7 +12,8 @@
 module;
 
 #include <atomic>           // std::atomic_flag
-#include <cstdio>           // ::fprintf(), ::snprintf()
+#include <array>            // std::array
+#include <cstdio>           // ::fprintf()
 #include <cstdlib>          // std::abort
 #include <exception>        // std::exception
 #include <format>           // std::format
@@ -49,6 +50,7 @@ namespace GuardFW
 /**
  * Alternative terminate() handler, handles exceptions and outputs their error text.
  */
+// NOLINTNEXTLINE(misc-use-internal-linkage): C++20 module 'export' not respected by clang-tidy
 export [[noreturn]] void terminate_handler() noexcept
 {
     static std::atomic_flag terminating = ATOMIC_FLAG_INIT;
@@ -61,43 +63,52 @@ export [[noreturn]] void terminate_handler() noexcept
 
     const char* exception_name = exception_type->name();  // compiler-generated ugly class name
     int demangle_status        = -4;                      // query human-readable class name
-    char* demangled            = abi::__cxa_demangle(exception_name, nullptr, nullptr, &demangle_status);
+    // memory allocated by abi::__cxa_demangle() won't be freed due to abortion of process
+    const char* demangled      = abi::__cxa_demangle(exception_name, nullptr, nullptr, &demangle_status);
 
     if (demangle_status == 0 && demangled != nullptr)
         exception_name = demangled;  // use human-readable demangled class name
 
-    constexpr size_t output_size {1024};  // 1 kB ought to be enough for anybody ;-)
-    // NOLINTNEXTLINE(*-avoid-c-arrays): C-array granted here
-    char output[output_size];  // we are in a terminate handler and don't want to
-    int result = 0;
+    constexpr size_t output_buffer_size {1024};          // output buffer size 1k on stack
+    std::array<char, output_buffer_size> output_buffer;  // NOLINT(cppcoreguidelines-pro-type-member-init)
+    const char* output = "terminated due to exception";  // introductional text is also default
 
     try         // We already know that an exception has been thrown,
-    {           // but we don't know which exception it is.
+    {           // but it has not been catched and we don't know which exception it is.
         throw;  // Re-throw the current exception and catch it.
     }
     catch (const std::exception& e)  // what() is available
     {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg): allow snprintf
-        result = snprintf(&output[0], output_size, "terminated due to exception '%s' %s", exception_name, e.what());
+        // exception in std::format_to_n() will re-call terminate handler and exit with "terminated twice"
+        auto format_result = std::format_to_n(
+            output_buffer.begin(),
+            output_buffer.size() - 1,  // leave space for null terminator
+            "{} '{}' {}",
+            output,  // prepend introduction
+            exception_name,
+            e.what()
+        );
+        *format_result.out = '\0';  // append null terminator
+        output             = output_buffer.data();
     }
     catch (...)  // what() is unavailable
     {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg): allow snprintf
-        result = snprintf(&output[0], output_size, "terminated due to exception '%s'", exception_name);
+        // exception in std::format_to_n() will re-call terminate handler and exit with "terminated twice"
+        auto format_result = std::format_to_n(
+            output_buffer.begin(),
+            output_buffer.size() - 1,  // leave space for null terminator
+            "{} '{}'",
+            output,  // prepend introduction
+            exception_name
+        );
+        *format_result.out = '\0';  // append null terminator
+        output             = output_buffer.data();
     }
 
-    // NOLINTNEXTLINE(cppcoreguidelines-owning-memory, cppcoreguidelines-no-malloc): required by abi::__cxa_demangle()
-    free(demangled);  // free accepts nullptr
-
-    if (result < 0)                                      // error in snprintf
-        error_and_abort("terminated due to exception");  // [[noreturn]]
-
-    if (static_cast<size_t>(result) >= output_size)  // overflow in snprintf prevented
-        output[output_size - 1] = '\0';              // truncate error text
-
-    error_and_abort(&output[0]);  // [[noreturn]]
+    error_and_abort(output);  // [[noreturn]]
 }
 
+// NOLINTNEXTLINE(misc-use-internal-linkage): C++20 module 'export' not respected by clang-tidy
 export [[noreturn]] void throw_system_error(
     int error,
     const std::string_view& wrapped_function_name,
