@@ -12,6 +12,7 @@
 #include <cstdint>
 #include <source_location>
 #include <expected>
+#include <cstring>
 
 #include <errno.h>
 
@@ -98,9 +99,9 @@ TEST_CASE("wrapper: success, returns unsigned int", "[wrapper]")
 TEST_CASE("wrapper: error, throws", "[wrapper]")
 {
     std::ostringstream what;
-    what << "in function '" << fixloc.function_name()  // copied from ContextPosix<>::throw_function()
-         << "' in file '" << fixloc.file_name()        // copied from ContextPosix<>::throw_function()
-         << "' at line " << fixloc.line()              // copied from ContextPosix<>::throw_function()
+    what << "in function '" << fixloc.function_name()              // copied from ContextPosix<>::throw_function()
+         << "' in file '" << &strrchr(fixloc.file_name(), '/')[1]  // copied from ContextPosix<>::throw_function()
+         << "' at line " << fixloc.line()                          // copied from ContextPosix<>::throw_function()
          << ": wrapped call to 'tester_std()' failed with error 22: Invalid argument";
 
     CHECK(std::is_same_v<int, GuardFW::ReturnType<GuardFW::ContextStd::wrapper<tester_std, int, int, unsigned int>>>);

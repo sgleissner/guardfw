@@ -15,6 +15,7 @@ module;
 #include <array>            // std::array
 #include <cstdio>           // ::fprintf()
 #include <cstdlib>          // std::abort
+#include <cstring>          // strrchr()
 #include <exception>        // std::exception
 #include <format>           // std::format
 #include <source_location>  // std::source_location
@@ -115,13 +116,18 @@ export [[noreturn]] void throw_system_error(
     const std::source_location& source_location = std::source_location::current()
 )
 {
+    const char* const full_filename  = source_location.file_name();
+    const char* const short_filename = strrchr(full_filename, '/');
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic): granted, worst case points to '\0'
+    const char* const filename       = short_filename != nullptr ? &short_filename[1] : full_filename;
+
     throw std::system_error(
         error,
         std::system_category(),
         std::format(
             "in function '{}' in file '{}' at line {}: wrapped call to '{}()' failed with error {}",
             source_location.function_name(),
-            source_location.file_name(),
+            filename,
             source_location.line(),
             wrapped_function_name,
             error

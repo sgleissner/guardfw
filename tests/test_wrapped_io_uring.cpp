@@ -39,15 +39,16 @@ constexpr static std::source_location fixloc = fixed_location();
 TEST_CASE("io_uring exceptions", "[io_uring]")
 {
     std::ostringstream what_setup;
-    what_setup << "in function '" << fixloc.function_name()  // copied from ContextPosix<>::throw_function()
-               << "' in file '" << fixloc.file_name()        // copied from ContextPosix<>::throw_function()
-               << "' at line " << fixloc.line()              // copied from ContextPosix<>::throw_function()
+    what_setup << "in function '" << fixloc.function_name()              // copied from ContextPosix<>::throw_function()
+               << "' in file '" << &strrchr(fixloc.file_name(), '/')[1]  // copied from ContextPosix<>::throw_function()
+               << "' at line " << fixloc.line()                          // copied from ContextPosix<>::throw_function()
                << ": wrapped call to 'syscall()' failed with error 14: Bad address";
 
     std::ostringstream what_register_enter;
     what_register_enter << "in function '" << fixloc.function_name()  // copied from ContextPosix<>::throw_function()
-                        << "' in file '" << fixloc.file_name()        // copied from ContextPosix<>::throw_function()
-                        << "' at line " << fixloc.line()              // copied from ContextPosix<>::throw_function()
+                        << "' in file '"
+                        << &strrchr(fixloc.file_name(), '/')[1]  // copied from ContextPosix<>::throw_function()
+                        << "' at line " << fixloc.line()         // copied from ContextPosix<>::throw_function()
                         << ": wrapped call to 'syscall()' failed with error 9: Bad file descriptor";
 
     CHECK_THROWS_AS(GuardFW::io_uring_setup(256, nullptr, fixloc), std::system_error);

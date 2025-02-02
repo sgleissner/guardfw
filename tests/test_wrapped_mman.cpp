@@ -32,15 +32,16 @@ constexpr static std::source_location fixloc = fixed_location();
 TEST_CASE("mmap exceptions", "[mman]")
 {
     std::ostringstream what_mmap;
-    what_mmap << "in function '" << fixloc.function_name()  // copied from ContextPosix<>::throw_function()
-              << "' in file '" << fixloc.file_name()        // copied from ContextPosix<>::throw_function()
-              << "' at line " << fixloc.line()              // copied from ContextPosix<>::throw_function()
+    what_mmap << "in function '" << fixloc.function_name()              // copied from ContextPosix<>::throw_function()
+              << "' in file '" << &strrchr(fixloc.file_name(), '/')[1]  // copied from ContextPosix<>::throw_function()
+              << "' at line " << fixloc.line()                          // copied from ContextPosix<>::throw_function()
               << ": wrapped call to 'mmap()' failed with error 9: Bad file descriptor";
 
     std::ostringstream what_munmap;
     what_munmap << "in function '" << fixloc.function_name()  // copied from ContextPosix<>::throw_function()
-                << "' in file '" << fixloc.file_name()        // copied from ContextPosix<>::throw_function()
-                << "' at line " << fixloc.line()              // copied from ContextPosix<>::throw_function()
+                << "' in file '"
+                << &strrchr(fixloc.file_name(), '/')[1]  // copied from ContextPosix<>::throw_function()
+                << "' at line " << fixloc.line()         // copied from ContextPosix<>::throw_function()
                 << ": wrapped call to 'munmap()' failed with error 22: Invalid argument";
 
     [[maybe_unused]] void* unused_result;
